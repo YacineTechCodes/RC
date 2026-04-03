@@ -592,6 +592,7 @@
     cursor: none;
   }
   .nav-links a:hover { color: var(--text); }
+  .nav-links a.active { color: var(--accent); }
 
   /* PROGRESS BAR */
   .progress-bar {
@@ -625,7 +626,10 @@
 
 <nav>
   <div class="nav-logo">OSI<span>.</span>LEARN</div>
-  <div class="nav-links">
+  <div class="nav-links" style="display: flex; gap: 1rem; align-items: center;">
+    <a href="osi_model.html" class="active">Overview</a>
+    <a href="physical_layer_interactive_lesson.html">Layer 1</a>
+    <span style="color:var(--border);">|</span>
     <a href="#why">Why</a>
     <a href="#layers">Layers</a>
     <a href="#encapsulation">Encapsulation</a>

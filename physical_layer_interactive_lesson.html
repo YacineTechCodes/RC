@@ -78,6 +78,36 @@
     box-shadow: 0 10px 30px -10px rgba(124, 106, 255, 0.15);
   }
 
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1.2rem 2.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+  .nav-logo span { color: var(--accent); }
+
+  .nav-links { display: flex; gap: 2rem; }
+  .nav-links a {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    transition: color 0.2s;
+    cursor: none;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a.active { color: var(--accent); }
+
   #app {
     font-family: 'DM Sans', sans-serif;
     color: var(--color-text-primary);
@@ -423,7 +453,16 @@
 
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursorRing"></div>
-<div id="app">
+
+<nav>
+  <div class="nav-logo">OSI<span>.</span>LEARN</div>
+  <div class="nav-links" style="display: flex; gap: 1rem; align-items: center;">
+    <a href="osi_model.html">Overview</a>
+    <a href="physical_layer_interactive_lesson.html" class="active">Layer 1</a>
+  </div>
+</nav>
+
+<div id="app" style="margin-top: 5rem;">
   <div class="hero">
     <div class="hero-badge">OSI Layer 1</div>
     <h1>The Physical Layer</h1>
