@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Network Layer — Interactive Learning</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #12121a;
+    --bg3: #1a1a26;
+    --border: #2a2a3d;
+    --accent: #7c6aff;
+    --accent2: #ff6a9b;
+    --accent3: #6affcc;
+    --text: #e8e8f0;
+    --muted: #7070a0;
+    --c-ip: #45b7d1;
+    --c-route: #6bcb77;
+    --c-addr: #ffd93d;
+    --c-arp: #ff9f43;
+    --c-hw: #a78bfa;
+    --c-sub: #4ecdc4;
+    --c-danger: #ff6b6b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden; cursor: none;
+  }
+
+  .cursor {
+    width: 12px; height: 12px; background: var(--accent);
+    border-radius: 50%; position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9999; mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px; border: 1px solid var(--accent);
+    border-radius: 50%; position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9998; mix-blend-mode: screen; opacity: 0.5;
+  }
+
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(124,106,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,106,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px; pointer-events: none; z-index: 0;
+  }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1.2rem 2.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(10,10,15,0.85); backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em; }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 2rem; }
+  .nav-links a {
+    font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--muted);
+    text-decoration: none; letter-spacing: 0.08em; transition: color 0.2s; cursor: none;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 3px; background: var(--accent);
+    z-index: 200; transition: width 0.1s; box-shadow: 0 0 10px var(--accent);
+  }
+
+  /* HERO */
+  .hero {
+    position: relative; min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 2rem; padding-top: 80px;
+    overflow: hidden; z-index: 1;
+  }
+
+  .hero-glow {
+    position: absolute; width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(69,183,209,0.1) 0%, rgba(107,203,119,0.06) 40%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+    animation: pulse 5s ease-in-out infinite; pointer-events: none;
+  }
+  @keyframes pulse {
+    0%,100% { transform: translate(-50%,-50%) scale(1); opacity: 0.8; }
+    50% { transform: translate(-50%,-50%) scale(1.2); opacity: 1; }
+  }
+
+  /* Animated packet flow */
+  .hero-packets {
+    position: absolute; right: 6%; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 10px; opacity: 0.3;
+  }
+  .pkt {
+    height: 8px; border-radius: 4px;
+    animation: pktFlow 2.5s ease-in-out infinite;
+  }
+  .pkt:nth-child(1){width:70px;background:var(--c-ip);animation-delay:0s;}
+  .pkt:nth-child(2){width:100px;background:var(--c-route);animation-delay:0.3s;}
+  .pkt:nth-child(3){width:55px;background:var(--c-addr);animation-delay:0.6s;}
+  .pkt:nth-child(4){width:85px;background:var(--c-arp);animation-delay:0.9s;}
+  .pkt:nth-child(5){width:65px;background:var(--c-hw);animation-delay:1.2s;}
+  @keyframes pktFlow {
+    0%,100%{transform:translateX(0);opacity:0.5;}
+    50%{transform:translateX(-12px);opacity:1;}
+  }
+
+  .hero-tag {
+    font-family: 'Space Mono', monospace; font-size: 0.7rem;
+    letter-spacing: 0.3em; color: var(--accent); text-transform: uppercase;
+    border: 1px solid var(--accent); padding: 0.35rem 1rem; border-radius: 2px;
+    margin-bottom: 2rem; animation: fadeUp 0.8s ease forwards; opacity: 0;
+  }
+  .hero h1 {
+    font-size: clamp(3rem,10vw,7.5rem); font-weight: 800;
+    line-height: 0.9; letter-spacing: -0.03em; margin-bottom: 1.5rem;
+    animation: fadeUp 0.8s 0.2s ease forwards; opacity: 0;
+  }
+  .hero h1 span {
+    display: block;
+    background: linear-gradient(135deg, var(--c-ip) 0%, var(--accent) 50%, var(--c-route) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero-sub {
+    font-family: 'Space Mono', monospace; font-size: 0.9rem; color: var(--muted);
+    max-width: 500px; line-height: 1.7; margin-bottom: 3rem;
+    animation: fadeUp 0.8s 0.4s ease forwards; opacity: 0;
+  }
+  .hero-cta {
+    display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 0.8s 0.6s ease forwards; opacity: 0;
+  }
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(24px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+
+  .btn {
+    font-family: 'Space Mono', monospace; font-size: 0.8rem;
+    letter-spacing: 0.1em; padding: 0.8rem 2rem; border-radius: 2px;
+    text-decoration: none; transition: all 0.2s; display: inline-block; cursor: none;
+  }
+  .btn-primary { background: var(--accent); color: #fff; border: 1px solid var(--accent); box-shadow: 0 4px 15px rgba(124,106,255,0.2); }
+  .btn-primary:hover { background: transparent; color: var(--accent); box-shadow: 0 0 20px rgba(124,106,255,0.4); }
+  .btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* LAYOUT */
+  section { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 6rem 2rem; }
+  .divider { width: 100%; height: 1px; background: linear-gradient(90deg,transparent,var(--border),transparent); position: relative; z-index: 1; }
+
+  .section-label {
+    font-family: 'Space Mono', monospace; font-size: 0.65rem;
+    letter-spacing: 0.4em; color: var(--accent); text-transform: uppercase;
+    margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem;
+  }
+  .section-label::after { content: ''; flex: 1; max-width: 60px; height: 1px; background: var(--accent); }
+  .section-title { font-size: clamp(2rem,4vw,3rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 3rem; line-height: 1.1; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .grid3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+  .grid4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
+
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 1.75rem; border-radius: 8px; transition: all 0.3s; cursor: none;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 10px 30px -10px rgba(124,106,255,0.15); }
+  .card.accent2 { border-color: var(--accent2); background: rgba(255,106,155,0.04); }
+  .card-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+  .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .card p { font-family: 'Space Mono', monospace; font-size: 0.76rem; color: var(--muted); line-height: 1.7; }
+  .card p strong { color: var(--text); }
+
+  /* FUNCTION CARDS */
+  .func-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.5rem;
+    border-left: 3px solid; transition: all 0.3s; cursor: none;
+  }
+  .func-card:hover { transform: translateY(-3px); }
+  .func-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .func-card p { font-family: 'Space Mono', monospace; font-size: 0.74rem; color: var(--muted); line-height: 1.65; }
+  .func-card p strong { color: var(--text); }
+
+  /* IP HEADER VIZ */
+  .header-viz {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 2rem; margin-top: 1.5rem;
+  }
+  .header-title {
+    font-family: 'Space Mono', monospace; font-size: 0.65rem;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.5rem;
+  }
+  .header-row { display: flex; gap: 4px; margin-bottom: 4px; flex-wrap: wrap; }
+  .hfield {
+    font-family: 'Space Mono', monospace; font-size: 0.62rem;
+    padding: 0.5rem 0.4rem; border-radius: 3px; text-align: center;
+    font-weight: 700; letter-spacing: 0.03em; cursor: none;
+    transition: all 0.2s; position: relative; flex-shrink: 0;
+  }
+  .hfield:hover { transform: translateY(-3px); }
+  .hfield-label {
+    font-family: 'Space Mono', monospace; font-size: 0.6rem;
+    color: var(--muted); text-align: center; margin-top: 3px;
+  }
+  .field-tooltip {
+    position: absolute; bottom: calc(100% + 8px); left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 4px; padding: 0.5rem 0.75rem;
+    font-size: 0.65rem; color: var(--text); white-space: nowrap;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    z-index: 10; line-height: 1.5;
+  }
+  .hfield:hover .field-tooltip { opacity: 1; }
+
+  /* IP ADDRESS CLASSES */
+  .class-table {
+    width: 100%; border-collapse: collapse;
+    font-family: 'Space Mono', monospace; font-size: 0.76rem;
+    margin-top: 1.5rem;
+  }
+  .class-table th {
+    text-align: left; padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted); font-size: 0.65rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+  }
+  .class-table td {
+    padding: 0.85rem 1rem; border-bottom: 1px solid rgba(42,42,61,0.5);
+    color: var(--muted); transition: background 0.2s;
+  }
+  .class-table tr:hover td { background: rgba(124,106,255,0.04); }
+  .class-table td:first-child { font-weight: 700; }
+  .class-badge {
+    display: inline-block; font-size: 0.62rem;
+    padding: 0.15rem 0.5rem; border-radius: 2px; border: 1px solid; margin-right: 4px;
+  }
+
+  /* SUBNET CALCULATOR */
+  .subnet-box {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 2rem; margin-top: 1.5rem;
+  }
+  .subnet-input-row {
+    display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center;
+  }
+  .ip-field {
+    font-family: 'Space Mono', monospace; font-size: 0.85rem;
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text); padding: 0.6rem 0.75rem; border-radius: 4px;
+    width: 60px; text-align: center; outline: none; cursor: none;
+    transition: border-color 0.2s;
+  }
+  .ip-field:focus { border-color: var(--accent); }
+  .ip-sep { font-family: 'Space Mono', monospace; font-size: 1.2rem; color: var(--muted); line-height: 2.2; }
+  .cidr-select {
+    font-family: 'Space Mono', monospace; font-size: 0.85rem;
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text); padding: 0.6rem 0.75rem; border-radius: 4px;
+    outline: none; cursor: none;
+  }
+  .subnet-results {
+    display: grid; grid-template-columns: repeat(2,1fr); gap: 1rem; margin-top: 1rem;
+  }
+  .sresult {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.85rem 1rem;
+  }
+  .sresult-label { font-family: 'Space Mono', monospace; font-size: 0.62rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+  .sresult-val { font-family: 'Space Mono', monospace; font-size: 0.88rem; font-weight: 700; color: var(--accent3); }
+
+  /* AND OPERATION VIZ */
+  .and-viz {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.25rem; margin-top: 1rem;
+    font-family: 'Space Mono', monospace; font-size: 0.72rem;
+  }
+  .and-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 4px; }
+  .and-label { color: var(--muted); min-width: 80px; }
+  .and-bits { display: flex; gap: 3px; flex-wrap: wrap; }
+  .bit {
+    width: 20px; height: 20px; border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 700; font-family: 'Space Mono', monospace;
+  }
+  .bit-1 { background: rgba(69,183,209,0.2); color: var(--c-ip); border: 1px solid rgba(69,183,209,0.4); }
+  .bit-0 { background: rgba(112,112,160,0.1); color: var(--muted); border: 1px solid var(--border); }
+  .bit-result-1 { background: rgba(106,255,204,0.2); color: var(--accent3); border: 1px solid rgba(106,255,204,0.4); }
+  .bit-result-0 { background: rgba(112,112,160,0.05); color: var(--muted); border: 1px solid var(--border); }
+  .and-sep { height: 1px; background: var(--border); margin: 8px 0; }
+
+  /* ARP ANIMATION */
+  .arp-anim {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 2.5rem; margin-top: 1.5rem; text-align: center;
+  }
+  .arp-machines {
+    display: flex; justify-content: space-between; align-items: center;
+    max-width: 600px; margin: 0 auto; position: relative;
+  }
+  .arp-machine {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1rem 1.5rem; text-align: center;
+    font-family: 'Space Mono', monospace;
+  }
+  .arp-machine .name { font-size: 0.72rem; font-weight: 700; margin-bottom: 4px; }
+  .arp-machine .ip { font-size: 0.62rem; color: var(--c-ip); }
+  .arp-machine .mac { font-size: 0.6rem; color: var(--muted); margin-top: 2px; }
+
+  .arp-arrow {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0 1rem;
+  }
+  .arp-msg {
+    font-family: 'Space Mono', monospace; font-size: 0.62rem;
+    padding: 4px 10px; border-radius: 3px;
+    opacity: 0; transform: translateX(-20px);
+    transition: all 0.6s ease;
+  }
+  .arp-msg.broadcast { background: rgba(255,159,67,0.15); color: var(--c-arp); border: 1px solid rgba(255,159,67,0.3); }
+  .arp-msg.reply { background: rgba(106,255,204,0.1); color: var(--accent3); border: 1px solid rgba(106,255,204,0.2); }
+  .arp-msg.visible { opacity: 1; transform: translateX(0); }
+  .arp-line { width: 100%; height: 1px; background: var(--border); }
+
+  .arp-btn {
+    font-family: 'Space Mono', monospace; font-size: 0.75rem;
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text); padding: 0.7rem 1.5rem; border-radius: 2px;
+    cursor: none; transition: all 0.2s; margin-top: 1.5rem;
+  }
+  .arp-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ROUTING TABLE */
+  .routing-table {
+    width: 100%; border-collapse: collapse;
+    font-family: 'Space Mono', monospace; font-size: 0.74rem; margin-top: 1.5rem;
+  }
+  .routing-table th {
+    text-align: left; padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border); color: var(--muted);
+    font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase;
+    background: var(--bg3);
+  }
+  .routing-table td {
+    padding: 0.85rem 1rem; border-bottom: 1px solid rgba(42,42,61,0.5);
+    color: var(--muted); transition: all 0.2s;
+  }
+  .routing-table tr:hover td { background: rgba(107,203,119,0.04); color: var(--text); }
+  .rt-dest { color: var(--c-ip); }
+  .rt-mask { color: var(--c-sub); }
+  .rt-gw { color: var(--c-route); }
+  .rt-iface { color: var(--c-addr); }
+
+  /* HARDWARE CARDS */
+  .hw-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 2rem;
+    border-top: 3px solid; transition: all 0.3s; cursor: none;
+  }
+  .hw-card:hover { transform: translateY(-4px); }
+  .hw-card:nth-child(1) { border-top-color: var(--c-hw); }
+  .hw-card:nth-child(2) { border-top-color: var(--c-route); }
+  .hw-card h3 { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.3rem; }
+  .hw-card .hw-label { font-family: 'Space Mono', monospace; font-size: 0.62rem; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 1rem; }
+  .hw-card p { font-family: 'Space Mono', monospace; font-size: 0.76rem; color: var(--muted); line-height: 1.7; }
+  .hw-card p strong { color: var(--text); }
+  .hw-features { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 6px; }
+  .hw-feat {
+    font-family: 'Space Mono', monospace; font-size: 0.62rem;
+    padding: 0.2rem 0.6rem; border-radius: 2px; border: 1px solid var(--border); color: var(--muted);
+  }
+
+  /* ACCORDION */
+  .accordion { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .acc-item { border-bottom: 1px solid var(--border); }
+  .acc-item:last-child { border-bottom: none; }
+  .acc-header {
+    display: flex; align-items: center; gap: 1.5rem;
+    padding: 1.2rem 2rem; cursor: none; user-select: none; transition: background 0.25s;
+  }
+  .acc-header:hover { background: rgba(124,106,255,0.04); }
+  .acc-item.open .acc-header { background: rgba(124,106,255,0.05); }
+  .acc-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .acc-name { font-size: 1rem; font-weight: 700; flex: 1; }
+  .acc-tag {
+    font-family: 'Space Mono', monospace; font-size: 0.62rem;
+    padding: 0.2rem 0.6rem; border-radius: 2px; border: 1px solid;
+    letter-spacing: 0.08em; margin-right: 1rem;
+  }
+  .acc-arrow { font-size: 0.8rem; transition: transform 0.3s; color: var(--muted); }
+  .acc-item.open .acc-arrow { transform: rotate(180deg); }
+  .acc-body { max-height: 0; overflow: hidden; transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1); background: rgba(255,255,255,0.01); }
+  .acc-item.open .acc-body { max-height: 500px; }
+  .acc-content { padding: 1.5rem 2rem 2rem; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .acc-desc { font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--muted); line-height: 1.8; }
+  .acc-desc strong { color: var(--text); }
+  .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .tag { font-family: 'Space Mono', monospace; font-size: 0.68rem; padding: 0.2rem 0.6rem; border-radius: 2px; border: 1px solid var(--border); color: var(--text); }
+
+  /* QUIZ */
+  .quiz-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 2.5rem; margin-bottom: 1rem; transition: all 0.3s;
+  }
+  .quiz-card:hover { border-color: var(--accent); box-shadow: 0 10px 30px -10px rgba(124,106,255,0.1); }
+  .quiz-q { font-size: 1.05rem; font-weight: 700; margin-bottom: 1.5rem; line-height: 1.4; }
+  .quiz-q span { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--accent); letter-spacing: 0.2em; display: block; margin-bottom: 0.5rem; }
+  .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .quiz-opt {
+    font-family: 'Space Mono', monospace; font-size: 0.78rem; padding: 0.9rem 1.2rem;
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 4px;
+    cursor: none; transition: all 0.2s; text-align: left; color: var(--text);
+  }
+  .quiz-opt:hover { border-color: var(--accent); box-shadow: 0 4px 15px rgba(124,106,255,0.15); }
+  .quiz-opt.correct { border-color: var(--accent3); color: var(--accent3); background: rgba(106,255,204,0.07); }
+  .quiz-opt.wrong { border-color: var(--accent2); color: var(--accent2); background: rgba(255,106,155,0.07); }
+  .quiz-feedback { font-family: 'Space Mono', monospace; font-size: 0.78rem; margin-top: 1rem; padding: 0.8rem 1rem; border-radius: 3px; display: none; line-height: 1.6; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.good { background: rgba(106,255,204,0.1); color: var(--accent3); border: 1px solid rgba(106,255,204,0.2); }
+  .quiz-feedback.bad { background: rgba(255,106,155,0.1); color: var(--accent2); border: 1px solid rgba(255,106,155,0.2); }
+  .quiz-nav { display: flex; gap: 1rem; margin-top: 1.5rem; align-items: center; }
+  .quiz-score { font-family: 'Space Mono', monospace; font-size: 0.78rem; color: var(--muted); margin-left: auto; }
+
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  footer { position: relative; z-index: 1; text-align: center; padding: 3rem 2rem; border-top: 1px solid var(--border); }
+  footer p { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); line-height: 1.8; }
+
+  @media (max-width: 700px) {
+    .grid2,.grid3,.grid4,.acc-content,.quiz-options,.subnet-results { grid-template-columns: 1fr; }
+    .hero-packets { display: none; }
+    nav .nav-links { display: none; }
+    .arp-machines { flex-direction: column; gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="progress-bar" id="progressBar"></div>
+
+<nav>
+  <div class="nav-logo">NET<span>.</span>LEARN</div>
+  <div class="nav-links" style="display: flex; gap: 1rem; align-items: center;">
+    <a href="osi_model.html">Overview</a>
+    <a href="physical_layer.html">Layer 1</a>
+    <a href="network_layer.html" style="color:var(--text);">Layer 3</a>
+    <span style="color:var(--border);">|</span>
+    <a href="#functions">Functions</a>
+    <a href="#ip">IP Protocol</a>
+    <a href="#addressing">Addressing</a>
+    <a href="#arp">ARP</a>
+    <a href="#hardware">Hardware</a>
+    <a href="#quiz">Quiz</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-packets">
+    <div class="pkt"></div><div class="pkt"></div><div class="pkt"></div>
+    <div class="pkt"></div><div class="pkt"></div>
+  </div>
+  <div class="hero-tag">OSI Layer 3 · Chapter 3 · Communication Networks</div>
+  <h1>The Network<br><span>Layer</span></h1>
+  <p class="hero-sub">Routing packets across the globe. IP addresses, routing tables, subnets — the intelligence behind every internet connection.</p>
+  <div class="hero-cta">
+    <a href="#functions" class="btn btn-primary">Start Learning</a>
+    <a href="#quiz" class="btn btn-secondary">Take the Quiz</a>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 01 FUNCTIONS -->
+<section id="functions">
+  <div class="section-label">01 — Core Responsibilities</div>
+  <h2 class="section-title reveal">What the Network Layer<br>actually does</h2>
+
+  <div class="grid2 reveal">
+    <div class="func-card" style="border-left-color:var(--c-ip);">
+      <h3>🏷️ Addressing</h3>
+      <p>Assigns <strong>logical IP addresses</strong> to identify every machine on the network. Unlike MAC addresses (which are physical), IP addresses are hierarchical and routable across the entire internet.</p>
+    </div>
+    <div class="func-card" style="border-left-color:var(--c-route);">
+      <h3>🗺️ Routing</h3>
+      <p>Determines the <strong>best path</strong> for data to travel from source to a distant destination. Routers examine each packet's destination IP and forward it hop by hop using routing tables.</p>
+    </div>
+    <div class="func-card" style="border-left-color:var(--c-addr);">
+      <h3>🔁 Relaying</h3>
+      <p>Forwards packets <strong>not destined for the local network</strong> toward their final destination. This is the core job of a router — receive, inspect, and relay.</p>
+    </div>
+    <div class="func-card" style="border-left-color:var(--c-danger);">
+      <h3>🚦 Flow Control</h3>
+      <p>Manages <strong>network congestion</strong> when too many packets circulate simultaneously. Prevents routers from being overwhelmed and maintains overall network stability.</p>
+    </div>
+  </div>
+
+  <!-- Routing strategies accordion -->
+  <h3 style="font-size:1.1rem;font-weight:700;margin:3rem 0 1rem;">Routing Strategies</h3>
+  <div class="accordion reveal">
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)">
+        <div class="acc-dot" style="background:var(--c-route);"></div>
+        <div class="acc-name">Global vs. Local Routing</div>
+        <div class="acc-tag" style="border-color:var(--c-route);color:var(--c-route);">SCOPE</div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="acc-desc"><strong>Global strategies</strong> use knowledge of the entire network topology to make routing decisions — they can find the optimal path but require significant communication overhead.<br><br><strong>Local strategies</strong> rely only on information about direct neighbors. Simpler and faster to update, but may not always find the globally optimal route.</div>
+        <div><h4 style="font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Examples</h4><div class="tags"><span class="tag" style="border-color:var(--c-route);color:var(--c-route);">OSPF (Global)</span><span class="tag" style="border-color:var(--c-route);color:var(--c-route);">RIP (Local)</span><span class="tag" style="border-color:var(--c-route);color:var(--c-route);">BGP (Global)</span></div></div>
+      </div></div>
+    </div>
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)">
+        <div class="acc-dot" style="background:var(--c-addr);"></div>
+        <div class="acc-name">Static vs. Dynamic Routing</div>
+        <div class="acc-tag" style="border-color:var(--c-addr);color:var(--c-addr);">ADAPTATION</div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="acc-desc"><strong>Static routes</strong> are manually configured and fixed. They don't change unless an administrator updates them. Simple and predictable, but don't adapt to network failures.<br><br><strong>Dynamic routes</strong> update automatically using routing protocols that share information about network changes, traffic load, and failures. Essential for large, complex networks like the Internet.</div>
+        <div><h4 style="font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Protocols</h4><div class="tags"><span class="tag" style="border-color:var(--c-addr);color:var(--c-addr);">RIP</span><span class="tag" style="border-color:var(--c-addr);color:var(--c-addr);">OSPF</span><span class="tag" style="border-color:var(--c-addr);color:var(--c-addr);">EIGRP</span><span class="tag" style="border-color:var(--c-addr);color:var(--c-addr);">BGP</span></div></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- Routing table -->
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:2rem;margin-top:2rem;" class="reveal">
+    <div style="font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem;">Example Routing Table</div>
+    <p style="font-family:'Space Mono',monospace;font-size:0.74rem;color:var(--muted);margin-bottom:1rem;">A router uses this database to decide where to forward each packet based on its destination address.</p>
+    <table class="routing-table">
+      <thead><tr><th>Destination</th><th>Mask</th><th>Gateway</th><th>Interface</th><th>Metric</th></tr></thead>
+      <tbody>
+        <tr><td class="rt-dest">192.168.1.0</td><td class="rt-mask">255.255.255.0</td><td class="rt-gw">0.0.0.0</td><td class="rt-iface">eth0</td><td style="color:var(--accent3);">0</td></tr>
+        <tr><td class="rt-dest">10.0.0.0</td><td class="rt-mask">255.0.0.0</td><td class="rt-gw">192.168.1.1</td><td class="rt-iface">eth0</td><td style="color:var(--accent3);">1</td></tr>
+        <tr><td class="rt-dest">172.16.0.0</td><td class="rt-mask">255.255.0.0</td><td class="rt-gw">192.168.1.254</td><td class="rt-iface">eth1</td><td style="color:var(--c-addr);">2</td></tr>
+        <tr><td class="rt-dest">0.0.0.0</td><td class="rt-mask">0.0.0.0</td><td class="rt-gw">192.168.1.1</td><td class="rt-iface">eth0</td><td style="color:var(--c-danger);">10</td></tr>
+      </tbody>
+    </table>
+    <p style="font-family:'Space Mono',monospace;font-size:0.68rem;color:var(--muted);margin-top:0.75rem;">↑ The last row (0.0.0.0) is the <strong style="color:var(--text)">default route</strong> — used when no other rule matches. It points to the internet gateway.</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 02 IP PROTOCOL -->
+<section id="ip">
+  <div class="section-label">02 — IP Protocol & Datagrams</div>
+  <h2 class="section-title reveal">Inside every<br>IP packet</h2>
+
+  <p class="reveal" style="font-family:'Space Mono',monospace;font-size:0.82rem;color:var(--muted);max-width:700px;line-height:1.8;margin-bottom:2rem;">The Internet Protocol (IP) adds addressing information to every packet. Each packet carries a <strong style="color:var(--text)">header</strong> containing metadata that routers use to forward it correctly. Hover over each field to learn what it does.</p>
+
+  <!-- IP Header Visualization -->
+  <div class="header-viz reveal">
+    <div class="header-title">IPv4 Datagram Header — hover each field</div>
+
+    <div class="header-row">
+      <div class="hfield" style="background:rgba(69,183,209,0.2);color:var(--c-ip);border:1px solid rgba(69,183,209,0.4);width:70px;">
+        Version<div class="field-tooltip">Protocol version. IPv4 = 4, IPv6 = 6.</div>
+      </div>
+      <div class="hfield" style="background:rgba(69,183,209,0.15);color:var(--c-ip);border:1px solid rgba(69,183,209,0.3);width:60px;">
+        IHL<div class="field-tooltip">Internet Header Length — size of the header in 32-bit words.</div>
+      </div>
+      <div class="hfield" style="background:rgba(107,203,119,0.15);color:var(--c-route);border:1px solid rgba(107,203,119,0.3);width:80px;">
+        ToS<div class="field-tooltip">Type of Service — quality of service priority for this packet.</div>
+      </div>
+      <div class="hfield" style="background:rgba(107,203,119,0.2);color:var(--c-route);border:1px solid rgba(107,203,119,0.4);flex:1;">
+        Total Length<div class="field-tooltip">Combined size of header + data in bytes. Max 65,535 bytes.</div>
+      </div>
+    </div>
+
+    <div class="header-row">
+      <div class="hfield" style="background:rgba(255,211,61,0.15);color:var(--c-addr);border:1px solid rgba(255,211,61,0.3);flex:1;">
+        Identification<div class="field-tooltip">Unique ID to reassemble fragmented packets at the destination.</div>
+      </div>
+      <div class="hfield" style="background:rgba(255,211,61,0.1);color:var(--c-addr);border:1px solid rgba(255,211,61,0.2);width:60px;">
+        Flags<div class="field-tooltip">Control fragmentation. DF=Don't Fragment, MF=More Fragments follow.</div>
+      </div>
+      <div class="hfield" style="background:rgba(255,211,61,0.1);color:var(--c-addr);border:1px solid rgba(255,211,61,0.2);width:90px;">
+        Frag Offset<div class="field-tooltip">Position of this fragment within the original unfragmented datagram.</div>
+      </div>
+    </div>
+
+    <div class="header-row">
+      <div class="hfield" style="background:rgba(255,107,107,0.2);color:var(--c-danger);border:1px solid rgba(255,107,107,0.4);width:70px;">
+        TTL<div class="field-tooltip">Time To Live — decremented at each router. Packet destroyed when it reaches 0, preventing infinite loops.</div>
+      </div>
+      <div class="hfield" style="background:rgba(78,205,196,0.15);color:var(--c-sub);border:1px solid rgba(78,205,196,0.3);width:90px;">
+        Protocol<div class="field-tooltip">Upper-layer protocol: 6=TCP, 17=UDP, 1=ICMP.</div>
+      </div>
+      <div class="hfield" style="background:rgba(167,139,250,0.15);color:var(--c-hw);border:1px solid rgba(167,139,250,0.3);flex:1;">
+        Header Checksum<div class="field-tooltip">Verifies the integrity of the header. Recalculated at each hop (TTL changes).</div>
+      </div>
+    </div>
+
+    <div class="header-row">
+      <div class="hfield" style="background:rgba(69,183,209,0.2);color:var(--c-ip);border:1px solid rgba(69,183,209,0.5);flex:1;font-size:0.72rem;">
+        Source IP Address (32 bits)<div class="field-tooltip">The sender's IP address — 32 bits (4 bytes), e.g. 192.168.1.10</div>
+      </div>
+    </div>
+    <div class="header-row">
+      <div class="hfield" style="background:rgba(107,203,119,0.2);color:var(--c-route);border:1px solid rgba(107,203,119,0.5);flex:1;font-size:0.72rem;">
+        Destination IP Address (32 bits)<div class="field-tooltip">The receiver's IP address — 32 bits (4 bytes), e.g. 8.8.8.8</div>
+      </div>
+    </div>
+    <div class="header-row">
+      <div class="hfield" style="background:rgba(42,42,61,0.5);color:var(--muted);border:1px solid var(--border);flex:1;font-size:0.7rem;">
+        Data / Payload<div class="field-tooltip">The actual content being transported — handed down from the Transport layer.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TTL Explainer -->
+  <div class="grid2 reveal" style="margin-top:1.5rem;">
+    <div class="card">
+      <div class="card-icon">⏱️</div>
+      <h3>Time To Live (TTL)</h3>
+      <p>Every packet starts with a TTL value (e.g., 64 or 128). <strong>Each router decrements it by 1</strong>. When it hits 0, the packet is discarded and an ICMP "Time Exceeded" message is sent back to the sender. This prevents packets from looping forever in the network.</p>
+    </div>
+    <div class="card accent2">
+      <div class="card-icon">🔒</div>
+      <h3>Header Checksum</h3>
+      <p>Since the TTL changes at every hop, <strong>the checksum must be recalculated at every router</strong>. It protects only the header — not the payload. The Transport layer (TCP) handles payload integrity separately.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 03 ADDRESSING -->
+<section id="addressing">
+  <div class="section-label">03 — IP Addressing & Subnetting</div>
+  <h2 class="section-title reveal">The geography<br>of the internet</h2>
+
+  <!-- Address structure -->
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:2rem;margin-bottom:1.5rem;" class="reveal">
+    <div style="font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;">IP Address Structure</div>
+    <div style="display:flex;gap:4px;align-items:stretch;margin-bottom:0.75rem;flex-wrap:wrap;">
+      <div style="background:rgba(69,183,209,0.2);border:1px solid rgba(69,183,209,0.4);border-radius:4px;padding:0.75rem 1rem;flex:1;min-width:100px;">
+        <div style="font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--c-ip);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Network ID</div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--text);">192.168.1</div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--muted);margin-top:4px;">Identifies the network</div>
+      </div>
+      <div style="display:flex;align-items:center;font-family:'Space Mono',monospace;font-size:1.5rem;color:var(--border);padding:0 4px;">.</div>
+      <div style="background:rgba(107,203,119,0.2);border:1px solid rgba(107,203,119,0.4);border-radius:4px;padding:0.75rem 1rem;flex:0.4;min-width:80px;">
+        <div style="font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--c-route);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Host ID</div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--text);">42</div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--muted);margin-top:4px;">Identifies the machine</div>
+      </div>
+    </div>
+    <p style="font-family:'Space Mono',monospace;font-size:0.74rem;color:var(--muted);line-height:1.7;">A 32-bit address represented as 4 decimal numbers (0–255) separated by dots. The <strong style="color:var(--text)">subnet mask</strong> defines which part is the Network ID and which is the Host ID.</p>
+  </div>
+
+  <!-- Address classes -->
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:2rem;" class="reveal">
+    <div style="font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem;">IPv4 Address Classes</div>
+    <table class="class-table">
+      <thead><tr><th>Class</th><th>First Octet</th><th>Network/Host Split</th><th>Subnet Mask</th><th>Scale</th><th>Special</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="class-badge" style="border-color:var(--c-ip);color:var(--c-ip);">A</span></td>
+          <td style="color:var(--c-ip);">1 – 126</td>
+          <td style="color:var(--muted);">8 / 24 bits</td>
+          <td style="color:var(--accent3);font-family:'Space Mono',monospace;font-size:0.74rem;">255.0.0.0</td>
+          <td style="color:var(--text);">Large (16M hosts)</td>
+          <td style="color:var(--muted);font-size:0.68rem;">Governments, ISPs</td>
+        </tr>
+        <tr>
+          <td><span class="class-badge" style="border-color:var(--c-route);color:var(--c-route);">B</span></td>
+          <td style="color:var(--c-route);">128 – 191</td>
+          <td style="color:var(--muted);">16 / 16 bits</td>
+          <td style="color:var(--accent3);font-family:'Space Mono',monospace;font-size:0.74rem;">255.255.0.0</td>
+          <td style="color:var(--text);">Medium (65K hosts)</td>
+          <td style="color:var(--muted);font-size:0.68rem;">Universities</td>
+        </tr>
+        <tr>
+          <td><span class="class-badge" style="border-color:var(--c-addr);color:var(--c-addr);">C</span></td>
+          <td style="color:var(--c-addr);">192 – 223</td>
+          <td style="color:var(--muted);">24 / 8 bits</td>
+          <td style="color:var(--accent3);font-family:'Space Mono',monospace;font-size:0.74rem;">255.255.255.0</td>
+          <td style="color:var(--text);">Small (254 hosts)</td>
+          <td style="color:var(--muted);font-size:0.68rem;">Most businesses</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:1.5rem;display:flex;gap:1rem;flex-wrap:wrap;">
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:0.75rem 1rem;flex:1;min-width:160px;">
+        <div style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--muted);margin-bottom:4px;">Private Ranges</div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--c-sub);">10.0.0.0/8<br>172.16.0.0/12<br>192.168.0.0/16</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:0.75rem 1rem;flex:1;min-width:160px;">
+        <div style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--muted);margin-bottom:4px;">Loopback</div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--c-arp);">127.0.0.1<br>(localhost)</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:0.75rem 1rem;flex:1;min-width:160px;">
+        <div style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--muted);margin-bottom:4px;">Broadcast</div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--c-danger);">255.255.255.255<br>(all hosts)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subnet Calculator -->
+  <h3 style="font-size:1.1rem;font-weight:700;margin:3rem 0 0.5rem;">Subnetting</h3>
+  <p style="font-family:'Space Mono',monospace;font-size:0.76rem;color:var(--muted);margin-bottom:1rem;line-height:1.7;">Subnetting divides a large network into smaller sub-networks. A logical AND between the IP address and the subnet mask reveals the network address.</p>
+
+  <div class="subnet-box reveal">
+    <div style="font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;">Interactive Subnet Calculator</div>
+    <div class="subnet-input-row">
+      <input class="ip-field" id="ip0" type="number" min="0" max="255" value="192" oninput="calcSubnet()">
+      <span class="ip-sep">.</span>
+      <input class="ip-field" id="ip1" type="number" min="0" max="255" value="168" oninput="calcSubnet()">
+      <span class="ip-sep">.</span>
+      <input class="ip-field" id="ip2" type="number" min="0" max="255" value="10" oninput="calcSubnet()">
+      <span class="ip-sep">.</span>
+      <input class="ip-field" id="ip3" type="number" min="0" max="255" value="45" oninput="calcSubnet()">
+      <span class="ip-sep" style="font-size:1rem;">/</span>
+      <select class="cidr-select" id="cidr" onchange="calcSubnet()">
+        <option value="8">8 (Class A)</option>
+        <option value="16">16 (Class B)</option>
+        <option value="24" selected>24 (Class C)</option>
+        <option value="25">/25</option>
+        <option value="26">/26</option>
+        <option value="27">/27</option>
+        <option value="28">/28</option>
+      </select>
+    </div>
+
+    <div class="subnet-results">
+      <div class="sresult"><div class="sresult-label">Network Address</div><div class="sresult-val" id="sr-network">192.168.10.0</div></div>
+      <div class="sresult"><div class="sresult-label">Subnet Mask</div><div class="sresult-val" id="sr-mask">255.255.255.0</div></div>
+      <div class="sresult"><div class="sresult-label">Broadcast Address</div><div class="sresult-val" id="sr-bcast">192.168.10.255</div></div>
+      <div class="sresult"><div class="sresult-label">Usable Hosts</div><div class="sresult-val" id="sr-hosts">254</div></div>
+    </div>
+
+    <!-- AND operation visualization -->
+    <div class="and-viz" id="and-viz"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 04 ARP -->
+<section id="arp">
+  <div class="section-label">04 — Address Resolution Protocol</div>
+  <h2 class="section-title reveal">Bridging IP<br>to MAC addresses</h2>
+
+  <p class="reveal" style="font-family:'Space Mono',monospace;font-size:0.82rem;color:var(--muted);max-width:700px;line-height:1.8;margin-bottom:2rem;">Network hardware only understands <strong style="color:var(--text)">physical (MAC) addresses</strong>. ARP is the protocol that translates IP addresses into the MAC addresses needed to actually deliver a frame on the local network.</p>
+
+  <div class="arp-anim reveal">
+    <div style="font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:2rem;">ARP Request / Reply — click to animate</div>
+
+    <div class="arp-machines">
+      <div class="arp-machine">
+        <div class="name" style="color:var(--c-ip);">Machine A</div>
+        <div class="ip">192.168.1.10</div>
+        <div class="mac">MAC: AA:BB:CC:DD:EE:01</div>
+      </div>
+
+      <div class="arp-arrow">
+        <div class="arp-msg broadcast" id="arp-req">→ "Who has 192.168.1.20?"</div>
+        <div class="arp-line"></div>
+        <div class="arp-msg reply" id="arp-rep">← "I do! My MAC is FF:..."</div>
+      </div>
+
+      <div class="arp-machine">
+        <div class="name" style="color:var(--c-route);">Machine B</div>
+        <div class="ip">192.168.1.20</div>
+        <div class="mac">MAC: FF:EE:DD:CC:BB:02</div>
+      </div>
+    </div>
+
+    <button class="arp-btn" onclick="animateArp()">▶ Animate ARP Exchange</button>
+
+    <div style="margin-top:1.5rem;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:1rem;font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);text-align:left;line-height:1.7;">
+      <strong style="color:var(--text);">ARP Cache:</strong> Once B replies, A stores the IP→MAC mapping in its ARP cache so future packets skip the broadcast.
+      The cache entry expires after a timeout to handle IP reassignments.
+    </div>
+  </div>
+
+  <div class="grid2 reveal" style="margin-top:1.5rem;">
+    <div class="card">
+      <div class="card-icon">📢</div>
+      <h3>ARP Request (Broadcast)</h3>
+      <p>Machine A broadcasts to <strong>all devices on the local network</strong>: "Who has IP 192.168.1.20? Tell me your MAC." Every machine receives it, but only the one with that IP replies.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📬</div>
+      <h3>ARP Reply (Unicast)</h3>
+      <p>Machine B responds <strong>directly to Machine A</strong> with its MAC address. Machine A stores this in its ARP cache — a local table mapping IP→MAC for fast future lookups.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 05 HARDWARE -->
+<section id="hardware">
+  <div class="section-label">05 — Network Layer Hardware</div>
+  <h2 class="section-title reveal">Devices that operate<br>at Layer 3</h2>
+
+  <div class="grid2 reveal">
+    <div class="hw-card">
+      <h3>Router</h3>
+      <div class="hw-label">OSI Layer 3 Device</div>
+      <p>Routes packets between <strong>independent networks</strong> using its internal routing table. Examines each packet's destination IP, looks up the best next hop, and forwards it. Every hop on the internet is a router.</p>
+      <div class="hw-features">
+        <span class="hw-feat" style="border-color:var(--c-hw);color:var(--c-hw);">Routing table</span>
+        <span class="hw-feat" style="border-color:var(--c-hw);color:var(--c-hw);">IP forwarding</span>
+        <span class="hw-feat" style="border-color:var(--c-hw);color:var(--c-hw);">NAT</span>
+        <span class="hw-feat" style="border-color:var(--c-hw);color:var(--c-hw);">DHCP</span>
+      </div>
+    </div>
+    <div class="hw-card">
+      <h3>Gateway</h3>
+      <div class="hw-label">Heterogeneous Network Connector</div>
+      <p>Connects <strong>networks of different types</strong> — for example, a local LAN to the internet. Goes beyond routing to handle protocol translation, advanced packet processing, and can serve as a firewall.</p>
+      <div class="hw-features">
+        <span class="hw-feat" style="border-color:var(--c-route);color:var(--c-route);">Routing</span>
+        <span class="hw-feat" style="border-color:var(--c-route);color:var(--c-route);">Firewall</span>
+        <span class="hw-feat" style="border-color:var(--c-route);color:var(--c-route);">QoS</span>
+        <span class="hw-feat" style="border-color:var(--c-route);color:var(--c-route);">Protocol translation</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Router vs Switch vs Hub comparison -->
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:2rem;margin-top:1.5rem;" class="reveal">
+    <div style="font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1.5rem;">OSI Layer Comparison — Key Devices</div>
+    <div class="grid3" style="gap:1rem;">
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:1.25rem;border-top:3px solid var(--c-danger);">
+        <div style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--c-danger);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Layer 1</div>
+        <div style="font-size:1rem;font-weight:700;margin-bottom:0.5rem;">Hub</div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);line-height:1.6;">Broadcasts to all ports. No intelligence. Single collision domain.</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:1.25rem;border-top:3px solid var(--c-addr);">
+        <div style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--c-addr);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Layer 2</div>
+        <div style="font-size:1rem;font-weight:700;margin-bottom:0.5rem;">Switch</div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);line-height:1.6;">Uses MAC addresses to forward frames to the correct port only.</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:1.25rem;border-top:3px solid var(--c-hw);">
+        <div style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--c-hw);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Layer 3</div>
+        <div style="font-size:1rem;font-weight:700;margin-bottom:0.5rem;">Router</div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);line-height:1.6;">Uses IP addresses to route packets between different networks.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 06 QUIZ -->
+<section id="quiz">
+  <div class="section-label">06 — Knowledge Check</div>
+  <h2 class="section-title reveal">Test yourself</h2>
+  <div id="quizContainer" class="reveal"></div>
+</section>
+
+<footer>
+  <p>Network Layer · OSI Layer 3 · Chapter 3 · Communication Networks<br>
+  NTIC Faculty, University of Constantine 2 — Prof. Nabil Belala · 2025</p>
+</footer>
+
+<script>
+// ─── CURSOR ───────────────────────────────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+(function animCursor(){
+  rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;
+  cursor.style.transform=`translate(${mx-6}px,${my-6}px)`;
+  ring.style.transform=`translate(${rx-18}px,${ry-18}px)`;
+  requestAnimationFrame(animCursor);
+})();
+
+// ─── PROGRESS BAR ─────────────────────────────────────────────────────────────
+window.addEventListener('scroll',()=>{
+  const pct=window.scrollY/(document.body.scrollHeight-window.innerHeight)*100;
+  document.getElementById('progressBar').style.width=pct+'%';
+});
+
+// ─── ACCORDION ────────────────────────────────────────────────────────────────
+function toggleAcc(header){header.parentElement.classList.toggle('open');}
+
+// ─── SCROLL REVEAL ────────────────────────────────────────────────────────────
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');});
+},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// ─── SUBNET CALCULATOR ────────────────────────────────────────────────────────
+function calcSubnet(){
+  const octs=[0,1,2,3].map(i=>parseInt(document.getElementById('ip'+i).value)||0);
+  const cidr=parseInt(document.getElementById('cidr').value);
+
+  // Build 32-bit IP
+  const ip32=(octs[0]<<24)|(octs[1]<<16)|(octs[2]<<8)|octs[3];
+
+  // Build mask
+  const maskBits=cidr===0?0:(0xFFFFFFFF<<(32-cidr))>>>0;
+  const maskOcts=[(maskBits>>>24)&255,(maskBits>>>16)&255,(maskBits>>>8)&255,maskBits&255];
+
+  // Network
+  const net32=(ip32&maskBits)>>>0;
+  const netOcts=[(net32>>>24)&255,(net32>>>16)&255,(net32>>>8)&255,net32&255];
+
+  // Broadcast
+  const wildcard=(~maskBits)>>>0;
+  const bc32=(net32|wildcard)>>>0;
+  const bcOcts=[(bc32>>>24)&255,(bc32>>>16)&255,(bc32>>>8)&255,bc32&255];
+
+  // Hosts
+  const hosts=Math.max(0,Math.pow(2,32-cidr)-2);
+
+  document.getElementById('sr-network').textContent=netOcts.join('.');
+  document.getElementById('sr-mask').textContent=maskOcts.join('.');
+  document.getElementById('sr-bcast').textContent=bcOcts.join('.');
+  document.getElementById('sr-hosts').textContent=hosts.toLocaleString();
+
+  // AND visualization (first octet for simplicity)
+  buildAndViz(octs,maskOcts,netOcts);
+}
+
+function buildAndViz(ip,mask,net){
+  const viz=document.getElementById('and-viz');
+  if(!viz)return;
+
+  function toBits(n){return n.toString(2).padStart(8,'0').split('');}
+
+  // Show first two octets
+  const rows=[
+    {label:'IP Addr',bits:toBits(ip[0]).concat(['.',],toBits(ip[1])),type:'ip'},
+    {label:'Mask',bits:toBits(mask[0]).concat(['.',],toBits(mask[1])),type:'mask'},
+    {label:'AND →',bits:null},
+    {label:'Network',bits:toBits(net[0]).concat(['.',],toBits(net[1])),type:'result'},
+  ];
+
+  viz.innerHTML='<div style="font-family:\'Space Mono\',monospace;font-size:0.62rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.75rem;">AND operation — first 2 octets shown</div>';
+
+  rows.forEach((r,ri)=>{
+    if(r.label==='AND →'){
+      const sep=document.createElement('div');
+      sep.className='and-sep';
+      viz.appendChild(sep);
+      return;
+    }
+    const row=document.createElement('div');
+    row.className='and-row';
+    const lbl=document.createElement('div');
+    lbl.className='and-label';
+    lbl.textContent=r.label;
+    row.appendChild(lbl);
+    const bits=document.createElement('div');
+    bits.className='and-bits';
+    r.bits.forEach(b=>{
+      if(b==='.'){
+        const sep=document.createElement('span');
+        sep.style.cssText='font-family:Space Mono,monospace;font-size:0.8rem;color:var(--border);padding:0 2px;';
+        sep.textContent='.';
+        bits.appendChild(sep);
+        return;
+      }
+      const bit=document.createElement('div');
+      if(r.type==='result'){
+        bit.className='bit '+(b==='1'?'bit-result-1':'bit-result-0');
+      } else if(r.type==='mask'){
+        bit.className='bit '+(b==='1'?'bit-1':'bit-0');
+      } else {
+        bit.className='bit bit-1';
+        bit.style.opacity=b==='1'?'1':'0.4';
+      }
+      bit.textContent=b;
+      bits.appendChild(bit);
+    });
+    row.appendChild(bits);
+    viz.appendChild(row);
+  });
+}
+
+calcSubnet();
+
+// ─── ARP ANIMATION ────────────────────────────────────────────────────────────
+function animateArp(){
+  const req=document.getElementById('arp-req');
+  const rep=document.getElementById('arp-rep');
+  req.classList.remove('visible');rep.classList.remove('visible');
+  setTimeout(()=>req.classList.add('visible'),300);
+  setTimeout(()=>rep.classList.add('visible'),1200);
+}
+
+// ─── QUIZ ─────────────────────────────────────────────────────────────────────
+const questions=[
+  {
+    q:"What is the primary function of the Network Layer?",
+    options:["Error-free frame delivery between adjacent nodes","End-to-end routing of packets across networks","Establishing sessions between applications","Converting data formats between systems"],
+    answer:1,
+    explanation:"The Network Layer (Layer 3) is responsible for routing packets across networks — addressing, path selection, and relaying packets between source and destination machines, even across different networks."
+  },
+  {
+    q:"What does TTL (Time To Live) in an IP packet prevent?",
+    options:["Packet corruption during transmission","Packets looping infinitely in the network","Unauthorized access to the packet","Packet fragmentation"],
+    answer:1,
+    explanation:"TTL is decremented by 1 at each router. When it reaches 0, the packet is discarded and an ICMP message is sent back. This prevents packets from looping forever if routing tables have errors."
+  },
+  {
+    q:"Which subnet mask corresponds to a Class C network?",
+    options:["255.0.0.0","255.255.0.0","255.255.255.0","255.255.255.128"],
+    answer:2,
+    explanation:"Class C networks use a subnet mask of 255.255.255.0 (/24), meaning the first 24 bits identify the network and the last 8 bits identify the host. This allows up to 254 usable hosts per network."
+  },
+  {
+    q:"To find the Network Address from an IP and subnet mask, you perform...",
+    options:["A logical OR operation","A logical AND operation","A logical XOR operation","A bitwise NOT operation"],
+    answer:1,
+    explanation:"A logical AND between the IP address and the subnet mask isolates the network portion. Wherever the mask has a 1 bit, the IP bit is kept; wherever the mask has a 0 bit, the result is 0."
+  },
+  {
+    q:"What is the purpose of ARP (Address Resolution Protocol)?",
+    options:[
+      "Translate domain names to IP addresses",
+      "Assign IP addresses automatically",
+      "Translate IP addresses to physical MAC addresses",
+      "Route packets between networks"
+    ],
+    answer:2,
+    explanation:"ARP bridges the gap between Layer 3 (IP) and Layer 2 (MAC). Hardware only understands MAC addresses, so ARP broadcasts a request asking which machine owns a given IP, then caches the reply."
+  },
+  {
+    q:"What is the loopback address in IPv4?",
+    options:["0.0.0.0","192.168.1.1","255.255.255.255","127.0.0.1"],
+    answer:3,
+    explanation:"127.0.0.1 (localhost) is the loopback address — it allows a machine to communicate with itself without sending traffic over the network. Used extensively for local testing and inter-process communication."
+  },
+  {
+    q:"What distinguishes a Gateway from a Router?",
+    options:[
+      "A gateway only works at Layer 2",
+      "A gateway connects heterogeneous networks and can do protocol translation, firewalling, and QoS",
+      "A gateway uses MAC addresses instead of IP addresses",
+      "A gateway is only used in wireless networks"
+    ],
+    answer:1,
+    explanation:"While a router forwards packets between similar networks, a gateway connects heterogeneous networks (like a LAN to the Internet). It can perform routing, protocol translation, firewall duties, and manage Quality of Service."
+  },
+  {
+    q:"In dynamic routing, routes are...",
+    options:[
+      "Manually configured by a network administrator",
+      "Fixed and never change",
+      "Updated automatically by routing protocols to reflect network changes",
+      "Stored only in the end-host's routing table"
+    ],
+    answer:2,
+    explanation:"Dynamic routing protocols (RIP, OSPF, BGP) automatically share network topology information between routers and update routing tables to reflect changes in network state, traffic, and failures."
+  }
+];
+
+let current=0,score=0,answered=false;
+
+function renderQuiz(){
+  const q=questions[current];
+  document.getElementById('quizContainer').innerHTML=`
+    <div class="quiz-card">
+      <div class="quiz-q">
+        <span>Question ${current+1} of ${questions.length}</span>
+        ${q.q}
+      </div>
+      <div class="quiz-options">
+        ${q.options.map((o,i)=>`<button class="quiz-opt" onclick="doAnswer(${i})">${o}</button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="qfb"></div>
+      <div class="quiz-nav">
+        ${current<questions.length-1
+          ?`<button class="btn btn-secondary" id="nextBtn" onclick="nextQ()" style="display:none">Next →</button>`
+          :`<button class="btn btn-primary" id="nextBtn" onclick="showResult()" style="display:none">See Results</button>`
+        }
+        <div class="quiz-score">Score: ${score}/${current}</div>
+      </div>
+    </div>
+  `;
+  answered=false;
+}
+
+function doAnswer(idx){
+  if(answered)return;
+  answered=true;
+  const q=questions[current];
+  document.querySelectorAll('.quiz-opt').forEach((o,i)=>{
+    if(i===q.answer)o.classList.add('correct');
+    else if(i===idx)o.classList.add('wrong');
+    o.onclick=null;
+  });
+  const fb=document.getElementById('qfb');
+  if(idx===q.answer){score++;fb.className='quiz-feedback show good';fb.innerHTML='✓ Correct! '+q.explanation;}
+  else{fb.className='quiz-feedback show bad';fb.innerHTML='✗ Not quite. '+q.explanation;}
+  document.getElementById('nextBtn').style.display='inline-block';
+  document.querySelector('.quiz-score').textContent=`Score: ${score}/${current+1}`;
+}
+
+function nextQ(){current++;renderQuiz();}
+
+function showResult(){
+  const pct=Math.round(score/questions.length*100);
+  const grade=pct===100?'🏆 Perfect!':pct>=70?'✅ Well done!':'📚 Keep studying!';
+  document.getElementById('quizContainer').innerHTML=`
+    <div class="quiz-card" style="text-align:center">
+      <div style="font-size:4rem;margin-bottom:1rem">${grade.split(' ')[0]}</div>
+      <h2 style="font-size:2rem;margin-bottom:0.5rem">${score} / ${questions.length}</h2>
+      <p style="font-family:'Space Mono',monospace;font-size:0.8rem;color:var(--muted);margin-bottom:2rem">${pct}% — ${grade.split(' ').slice(1).join(' ')}</p>
+      <button class="btn btn-primary" onclick="restartQuiz()">Try Again</button>
+    </div>
+  `;
+}
+
+function restartQuiz(){current=0;score=0;answered=false;renderQuiz();}
+
+renderQuiz();
+</script>
+</body>
+</html>

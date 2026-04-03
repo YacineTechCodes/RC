@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Physical Layer — Interactive Learning</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #12121a;
+    --bg3: #1a1a26;
+    --border: #2a2a3d;
+    --accent: #7c6aff;
+    --accent2: #ff6a9b;
+    --accent3: #6affcc;
+    --text: #e8e8f0;
+    --muted: #7070a0;
+    --c-analog: #ff6b6b;
+    --c-digital: #6bcb77;
+    --c-media: #45b7d1;
+    --c-devices: #a78bfa;
+    --c-rates: #ffd93d;
+    --c-modes: #ff9f43;
+    --c-shannon: #4ecdc4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9999;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9998;
+    mix-blend-mode: screen;
+    opacity: 0.5;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(124,106,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,106,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1.2rem 2.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em;
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 2rem; }
+  .nav-links a {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem; color: var(--muted);
+    text-decoration: none; letter-spacing: 0.08em;
+    transition: color 0.2s; cursor: none;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  .progress-bar {
+    position: fixed; top: 0; left: 0;
+    height: 3px; background: var(--accent);
+    z-index: 200; transition: width 0.1s;
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  /* HERO */
+  .hero {
+    position: relative; min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 2rem;
+    overflow: hidden; z-index: 1;
+    padding-top: 80px;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(124,106,255,0.12) 0%, rgba(255,107,107,0.05) 40%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    animation: pulse 5s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  }
+
+  .hero-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.3em; color: var(--accent);
+    text-transform: uppercase; border: 1px solid var(--accent);
+    padding: 0.35rem 1rem; border-radius: 2px; margin-bottom: 2rem;
+    animation: fadeUp 0.8s ease forwards; opacity: 0;
+  }
+
+  .hero h1 {
+    font-size: clamp(3rem, 10vw, 7.5rem);
+    font-weight: 800; line-height: 0.9;
+    letter-spacing: -0.03em; margin-bottom: 1.5rem;
+    animation: fadeUp 0.8s 0.2s ease forwards; opacity: 0;
+  }
+
+  .hero h1 span {
+    display: block;
+    background: linear-gradient(135deg, var(--c-analog) 0%, var(--accent) 50%, var(--c-media) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .hero-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.9rem; color: var(--muted);
+    max-width: 500px; line-height: 1.7; margin-bottom: 3rem;
+    animation: fadeUp 0.8s 0.4s ease forwards; opacity: 0;
+  }
+
+  .hero-cta {
+    display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 0.8s 0.6s ease forwards; opacity: 0;
+  }
+
+  /* Animated signal bars in hero */
+  .hero-signal {
+    position: absolute; left: 5%; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 8px; opacity: 0.25;
+  }
+  .signal-wave {
+    height: 3px; border-radius: 2px;
+    animation: signalPulse 2.5s ease-in-out infinite;
+  }
+  .signal-wave:nth-child(1) { width: 60px; background: var(--c-analog); animation-delay: 0s; }
+  .signal-wave:nth-child(2) { width: 90px; background: var(--c-analog); animation-delay: 0.2s; }
+  .signal-wave:nth-child(3) { width: 70px; background: var(--c-digital); animation-delay: 0.4s; }
+  .signal-wave:nth-child(4) { width: 100px; background: var(--c-digital); animation-delay: 0.6s; }
+  .signal-wave:nth-child(5) { width: 55px; background: var(--c-media); animation-delay: 0.8s; }
+
+  @keyframes signalPulse {
+    0%, 100% { transform: scaleX(1); opacity: 0.6; }
+    50% { transform: scaleX(1.3); opacity: 1; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .btn {
+    font-family: 'Space Mono', monospace; font-size: 0.8rem;
+    letter-spacing: 0.1em; padding: 0.8rem 2rem; border-radius: 2px;
+    text-decoration: none; transition: all 0.2s; display: inline-block; cursor: none;
+  }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: 1px solid var(--accent);
+    box-shadow: 0 4px 15px rgba(124,106,255,0.2);
+  }
+  .btn-primary:hover { background: transparent; color: var(--accent); box-shadow: 0 0 20px rgba(124,106,255,0.4); }
+  .btn-secondary {
+    background: transparent; color: var(--text); border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* SECTIONS */
+  section {
+    position: relative; z-index: 1;
+    max-width: 1100px; margin: 0 auto; padding: 6rem 2rem;
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace; font-size: 0.65rem;
+    letter-spacing: 0.4em; color: var(--accent); text-transform: uppercase;
+    margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem;
+  }
+  .section-label::after {
+    content: ''; flex: 1; max-width: 60px; height: 1px; background: var(--accent);
+  }
+
+  .section-title {
+    font-size: clamp(2rem, 4vw, 3rem); font-weight: 800;
+    letter-spacing: -0.02em; margin-bottom: 3rem; line-height: 1.1;
+  }
+
+  .divider {
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    position: relative; z-index: 1;
+  }
+
+  /* CARDS */
+  .grid2 {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+  }
+
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 2rem; border-radius: 8px;
+    transition: all 0.3s ease; cursor: none;
+  }
+  .card:hover {
+    border-color: var(--accent); transform: translateY(-5px);
+    box-shadow: 0 10px 30px -10px rgba(124,106,255,0.15);
+  }
+  .card.accent2 { border-color: var(--accent2); background: rgba(255,106,155,0.04); }
+  .card-icon { font-size: 2rem; margin-bottom: 1rem; }
+  .card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .card p {
+    font-family: 'Space Mono', monospace; font-size: 0.78rem;
+    color: var(--muted); line-height: 1.7;
+  }
+  .card p strong { color: var(--text); }
+
+  /* ACCORDION */
+  .accordion { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+
+  .acc-item { border-bottom: 1px solid var(--border); }
+  .acc-item:last-child { border-bottom: none; }
+
+  .acc-header {
+    display: flex; align-items: center; gap: 1.5rem;
+    padding: 1.2rem 2rem; cursor: none; user-select: none;
+    transition: background 0.25s;
+  }
+  .acc-header:hover { background: rgba(124,106,255,0.04); }
+  .acc-item.open .acc-header { background: rgba(124,106,255,0.05); }
+
+  .acc-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+  .acc-name { font-size: 1rem; font-weight: 700; flex: 1; }
+  .acc-tag {
+    font-family: 'Space Mono', monospace; font-size: 0.62rem;
+    padding: 0.2rem 0.6rem; border-radius: 2px; border: 1px solid;
+    letter-spacing: 0.08em; margin-right: 1rem;
+  }
+  .acc-arrow { font-size: 0.8rem; transition: transform 0.3s; color: var(--muted); }
+  .acc-item.open .acc-arrow { transform: rotate(180deg); }
+
+  .acc-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1);
+    background: rgba(255,255,255,0.01);
+  }
+  .acc-item.open .acc-body { max-height: 600px; }
+
+  .acc-content {
+    padding: 1.5rem 2rem 2rem;
+    border-top: 1px solid var(--border);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+  }
+
+  .acc-desc {
+    font-family: 'Space Mono', monospace; font-size: 0.8rem;
+    color: var(--muted); line-height: 1.8;
+  }
+  .acc-desc strong { color: var(--text); }
+
+  .acc-tags-wrap h4 {
+    font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 0.75rem;
+    font-family: 'Space Mono', monospace;
+  }
+  .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .tag {
+    font-family: 'Space Mono', monospace; font-size: 0.68rem;
+    padding: 0.2rem 0.6rem; border-radius: 2px; border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  /* SIGNAL CANVAS SECTION */
+  .signal-demo-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;
+  }
+
+  .signal-box {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.5rem;
+    transition: all 0.3s;
+  }
+  .signal-box:hover { border-color: var(--muted); }
+
+  .signal-box h3 {
+    font-family: 'Space Mono', monospace; font-size: 0.72rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 1rem;
+  }
+
+  .wave-row { margin-bottom: 1rem; }
+  .wave-label {
+    font-family: 'Space Mono', monospace; font-size: 0.62rem;
+    color: var(--muted); margin-top: 4px; letter-spacing: 0.05em;
+  }
+
+  canvas { width: 100%; height: 60px; display: block; border-radius: 3px; }
+
+  /* SHANNON CALCULATOR */
+  .shannon-box {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 2.5rem; margin-top: 2rem;
+  }
+
+  .formula {
+    font-family: 'Space Mono', monospace; font-size: 1rem;
+    color: var(--accent3); background: var(--bg3);
+    border: 1px solid rgba(106,255,204,0.2);
+    padding: 1rem 1.5rem; border-radius: 4px; margin-bottom: 2rem;
+    letter-spacing: 0.05em;
+  }
+
+  .slider-row {
+    display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem;
+  }
+  .slider-row label {
+    font-family: 'Space Mono', monospace; font-size: 0.75rem;
+    color: var(--muted); min-width: 130px;
+  }
+  .slider-row input[type=range] {
+    flex: 1; appearance: none; height: 3px;
+    background: var(--border); border-radius: 2px; outline: none;
+  }
+  .slider-row input[type=range]::-webkit-slider-thumb {
+    appearance: none; width: 14px; height: 14px;
+    border-radius: 50%; background: var(--accent); cursor: none;
+  }
+  .slider-row span {
+    font-family: 'Space Mono', monospace; font-size: 0.78rem;
+    min-width: 90px; text-align: right; color: var(--text);
+  }
+
+  .result-display {
+    margin-top: 1.5rem; padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: baseline; gap: 1rem;
+  }
+  .result-label {
+    font-family: 'Space Mono', monospace; font-size: 0.78rem; color: var(--muted);
+  }
+  .result-value {
+    font-size: 2.5rem; font-weight: 800; color: var(--accent3);
+    letter-spacing: -0.02em;
+  }
+  .result-unit {
+    font-family: 'Space Mono', monospace; font-size: 0.78rem; color: var(--muted);
+  }
+
+  /* MEDIA TABLE */
+  .media-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+  }
+
+  .media-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.5rem;
+    transition: all 0.3s; cursor: none;
+  }
+  .media-card:hover { transform: translateY(-4px); }
+
+  .media-card.wire:hover { border-color: var(--c-media); box-shadow: 0 10px 25px -10px rgba(69,183,209,0.2); }
+  .media-card.wireless:hover { border-color: var(--c-analog); box-shadow: 0 10px 25px -10px rgba(255,107,107,0.2); }
+
+  .media-icon {
+    font-size: 1.5rem; margin-bottom: 0.75rem;
+    width: 44px; height: 44px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg3); border: 1px solid var(--border);
+  }
+  .media-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .media-card .sub {
+    font-family: 'Space Mono', monospace; font-size: 0.65rem;
+    color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .media-card p {
+    font-family: 'Space Mono', monospace; font-size: 0.73rem;
+    color: var(--muted); line-height: 1.7;
+  }
+  .media-card p strong { color: var(--text); }
+
+  /* DEVICES */
+  .device-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+  }
+  .device-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.5rem;
+    transition: all 0.3s; cursor: none;
+    border-top: 3px solid;
+  }
+  .device-card:nth-child(1) { border-top-color: var(--c-devices); }
+  .device-card:nth-child(2) { border-top-color: var(--c-analog); }
+  .device-card:nth-child(3) { border-top-color: var(--c-rates); }
+  .device-card:hover { transform: translateY(-4px); }
+
+  .device-card h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.4rem; }
+  .device-label {
+    font-family: 'Space Mono', monospace; font-size: 0.62rem;
+    color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .device-card p {
+    font-family: 'Space Mono', monospace; font-size: 0.75rem;
+    color: var(--muted); line-height: 1.7;
+  }
+  .device-card p strong { color: var(--text); }
+
+  /* MODES SECTION */
+  .modes-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .mode-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.5rem; text-align: center;
+    transition: all 0.3s;
+  }
+  .mode-card:hover { border-color: var(--muted); transform: translateY(-3px); }
+  .mode-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+  .mode-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .mode-card p {
+    font-family: 'Space Mono', monospace; font-size: 0.72rem;
+    color: var(--muted); line-height: 1.6;
+  }
+
+  /* MUX VIZ */
+  .mux-box {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 2rem; margin-top: 1.5rem;
+  }
+  .mux-title {
+    font-family: 'Space Mono', monospace; font-size: 0.72rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 1.5rem;
+  }
+  .mux-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+
+  .mux-lane {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .mux-slot {
+    height: 22px; border-radius: 3px;
+    font-family: 'Space Mono', monospace; font-size: 0.62rem;
+    display: flex; align-items: center; padding: 0 8px;
+    font-weight: 700; letter-spacing: 0.05em;
+  }
+  .mux-label-top {
+    font-family: 'Space Mono', monospace; font-size: 0.65rem;
+    color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  /* QUIZ */
+  .quiz-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 2.5rem; margin-bottom: 1rem;
+    transition: all 0.3s;
+  }
+  .quiz-card:hover { border-color: var(--accent); box-shadow: 0 10px 30px -10px rgba(124,106,255,0.1); }
+  .quiz-q { font-size: 1.05rem; font-weight: 700; margin-bottom: 1.5rem; line-height: 1.4; }
+  .quiz-q span {
+    font-family: 'Space Mono', monospace; font-size: 0.7rem;
+    color: var(--accent); letter-spacing: 0.2em; display: block; margin-bottom: 0.5rem;
+  }
+  .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .quiz-opt {
+    font-family: 'Space Mono', monospace; font-size: 0.78rem;
+    padding: 0.9rem 1.2rem; background: var(--bg3);
+    border: 1px solid var(--border); border-radius: 4px;
+    cursor: none; transition: all 0.2s; text-align: left; color: var(--text);
+  }
+  .quiz-opt:hover { border-color: var(--accent); box-shadow: 0 4px 15px rgba(124,106,255,0.15); }
+  .quiz-opt.correct { border-color: var(--accent3); color: var(--accent3); background: rgba(106,255,204,0.07); }
+  .quiz-opt.wrong { border-color: var(--accent2); color: var(--accent2); background: rgba(255,106,155,0.07); }
+  .quiz-feedback {
+    font-family: 'Space Mono', monospace; font-size: 0.78rem;
+    margin-top: 1rem; padding: 0.8rem 1rem; border-radius: 3px;
+    display: none; line-height: 1.6;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.good { background: rgba(106,255,204,0.1); color: var(--accent3); border: 1px solid rgba(106,255,204,0.2); }
+  .quiz-feedback.bad { background: rgba(255,106,155,0.1); color: var(--accent2); border: 1px solid rgba(255,106,155,0.2); }
+  .quiz-nav { display: flex; gap: 1rem; margin-top: 1.5rem; align-items: center; }
+  .quiz-score { font-family: 'Space Mono', monospace; font-size: 0.78rem; color: var(--muted); margin-left: auto; }
+
+  /* REVEAL */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  /* FOOTER */
+  footer {
+    position: relative; z-index: 1; text-align: center;
+    padding: 3rem 2rem; border-top: 1px solid var(--border);
+  }
+  footer p { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); line-height: 1.8; }
+
+  @media (max-width: 700px) {
+    .grid2, .acc-content, .signal-demo-grid, .media-grid,
+    .device-row, .modes-row, .quiz-options, .mux-grid { grid-template-columns: 1fr; }
+    .hero-signal { display: none; }
+    nav .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="progress-bar" id="progressBar"></div>
+
+<nav>
+  <div class="nav-logo">PHY<span>.</span>LEARN</div>
+  <div class="nav-links" style="display: flex; gap: 1rem; align-items: center;">
+    <a href="osi_model.html">Overview</a>
+    <a href="physical_layer.html" style="color:var(--text);">Layer 1</a>
+    <a href="network_layer.html">Layer 3</a>
+    <span style="color:var(--border);">|</span>
+    <a href="#transmission">Transmission</a>
+    <a href="#modes">Modes</a>
+    <a href="#rates">Data Rates</a>
+    <a href="#media">Media</a>
+    <a href="#quiz">Quiz</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-signal">
+    <div class="signal-wave"></div>
+    <div class="signal-wave"></div>
+    <div class="signal-wave"></div>
+    <div class="signal-wave"></div>
+    <div class="signal-wave"></div>
+  </div>
+  <div class="hero-tag">OSI Layer 1 · Chapter 1 · Communication Networks</div>
+  <h1>The Physical<br><span>Layer</span></h1>
+  <p class="hero-sub">Where bits become signals. The foundation of every network — cables, pulses, frequencies, and hardware.</p>
+  <div class="hero-cta">
+    <a href="#transmission" class="btn btn-primary">Start Learning</a>
+    <a href="#quiz" class="btn btn-secondary">Take the Quiz</a>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- TRANSMISSION SECTION -->
+<section id="transmission">
+  <div class="section-label">01 — Transmission Types</div>
+  <h2 class="section-title reveal">Analog vs Digital<br>— two ways to send data</h2>
+
+  <!-- Signal Visualizations -->
+  <div class="signal-demo-grid reveal">
+    <div class="signal-box">
+      <h3>⟿ Analog Modulation</h3>
+      <div class="wave-row">
+        <canvas id="c-am"></canvas>
+        <div class="wave-label">AM — Amplitude Modulation</div>
+      </div>
+      <div class="wave-row">
+        <canvas id="c-fm"></canvas>
+        <div class="wave-label">FM — Frequency Modulation</div>
+      </div>
+      <div class="wave-row">
+        <canvas id="c-pm"></canvas>
+        <div class="wave-label">PM — Phase Modulation</div>
+      </div>
+    </div>
+    <div class="signal-box">
+      <h3>⬛ Digital Encoding</h3>
+      <div class="wave-row">
+        <canvas id="c-nrz"></canvas>
+        <div class="wave-label">NRZ — Non-Return-to-Zero</div>
+      </div>
+      <div class="wave-row" style="margin-top: 1rem;">
+        <canvas id="c-manchester"></canvas>
+        <div class="wave-label">Manchester — transition-based logic</div>
+      </div>
+      <div class="wave-row" style="margin-top: 1rem;">
+        <div style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);line-height:1.7;background:var(--bg3);padding:0.75rem;border-radius:4px;border:1px solid var(--border);">
+          <strong style="color:var(--text)">NRZ:</strong> distinct voltage levels for 0 and 1<br>
+          <strong style="color:var(--text)">Manchester:</strong> logic encoded in transitions (↑ = 1, ↓ = 0)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accordion of modulation types -->
+  <div class="accordion reveal">
+
+    <div class="acc-item" data-color="#ff6b6b">
+      <div class="acc-header" onclick="toggleAcc(this)">
+        <div class="acc-dot" style="background:#ff6b6b;"></div>
+        <div class="acc-name">Amplitude Modulation (AM)</div>
+        <div class="acc-tag" style="border-color:#ff6b6b;color:#ff6b6b;">ANALOG</div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-content">
+          <div class="acc-desc">
+            AM encodes information by <strong>changing the signal's amplitude</strong> (its strength or height). A high amplitude might represent a logical 1, while a low amplitude represents 0. The carrier frequency remains constant — only the power changes.
+          </div>
+          <div class="acc-tags-wrap">
+            <h4>Characteristics</h4>
+            <div class="tags">
+              <span class="tag" style="border-color:#ff6b6b;color:#ff6b6b;">Sinusoidal carrier</span>
+              <span class="tag" style="border-color:#ff6b6b;color:#ff6b6b;">Varying voltage</span>
+              <span class="tag" style="border-color:#ff6b6b;color:#ff6b6b;">Noise-sensitive</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)">
+        <div class="acc-dot" style="background:#ff9f43;"></div>
+        <div class="acc-name">Frequency Modulation (FM)</div>
+        <div class="acc-tag" style="border-color:#ff9f43;color:#ff9f43;">ANALOG</div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-content">
+          <div class="acc-desc">
+            FM encodes logical values by <strong>varying the frequency</strong> of the carrier wave. A high frequency might represent a 1, a low frequency a 0. The amplitude stays constant, making FM more resistant to noise than AM.
+          </div>
+          <div class="acc-tags-wrap">
+            <h4>Characteristics</h4>
+            <div class="tags">
+              <span class="tag" style="border-color:#ff9f43;color:#ff9f43;">Constant amplitude</span>
+              <span class="tag" style="border-color:#ff9f43;color:#ff9f43;">Frequency shifts</span>
+              <span class="tag" style="border-color:#ff9f43;color:#ff9f43;">Noise-resistant</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)">
+        <div class="acc-dot" style="background:#ffd93d;"></div>
+        <div class="acc-name">Phase Modulation (PM)</div>
+        <div class="acc-tag" style="border-color:#ffd93d;color:#ffd93d;">ANALOG</div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-content">
+          <div class="acc-desc">
+            PM encodes information by <strong>modifying the phase</strong> of the carrier wave. A phase shift of 180° can represent a change in bit value. Both amplitude and frequency remain constant — only the wave's starting position changes.
+          </div>
+          <div class="acc-tags-wrap">
+            <h4>Characteristics</h4>
+            <div class="tags">
+              <span class="tag" style="border-color:#ffd93d;color:#ffd93d;">Phase shifts</span>
+              <span class="tag" style="border-color:#ffd93d;color:#ffd93d;">Used in QAM</span>
+              <span class="tag" style="border-color:#ffd93d;color:#ffd93d;">Wi-Fi / 4G</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)">
+        <div class="acc-dot" style="background:#6bcb77;"></div>
+        <div class="acc-name">NRZ — Non-Return-to-Zero</div>
+        <div class="acc-tag" style="border-color:#6bcb77;color:#6bcb77;">DIGITAL</div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-content">
+          <div class="acc-desc">
+            NRZ uses <strong>distinct electrical voltage levels</strong> to represent 0s and 1s. High voltage = 1, Low voltage = 0. The signal never "returns to zero" between bits. Simple and efficient but can have synchronization issues with long runs of the same bit.
+          </div>
+          <div class="acc-tags-wrap">
+            <h4>Characteristics</h4>
+            <div class="tags">
+              <span class="tag" style="border-color:#6bcb77;color:#6bcb77;">Square pulses</span>
+              <span class="tag" style="border-color:#6bcb77;color:#6bcb77;">Two voltage levels</span>
+              <span class="tag" style="border-color:#6bcb77;color:#6bcb77;">DC component</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-header" onclick="toggleAcc(this)">
+        <div class="acc-dot" style="background:#4ecdc4;"></div>
+        <div class="acc-name">Manchester Encoding</div>
+        <div class="acc-tag" style="border-color:#4ecdc4;color:#4ecdc4;">DIGITAL</div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-content">
+          <div class="acc-desc">
+            Manchester encoding represents logic based on <strong>transitions: low-to-high = 1, high-to-low = 0</strong>. Every bit period contains a transition, enabling the receiver to synchronize its clock automatically. Used in Ethernet (10BASE-T).
+          </div>
+          <div class="acc-tags-wrap">
+            <h4>Characteristics</h4>
+            <div class="tags">
+              <span class="tag" style="border-color:#4ecdc4;color:#4ecdc4;">Self-clocking</span>
+              <span class="tag" style="border-color:#4ecdc4;color:#4ecdc4;">No DC bias</span>
+              <span class="tag" style="border-color:#4ecdc4;color:#4ecdc4;">10BASE-T Ethernet</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Parallel vs Serial -->
+  <div class="grid2 reveal" style="margin-top:2rem;">
+    <div class="card">
+      <div class="card-icon">⟹⟹⟹</div>
+      <h3>Parallel Transmission</h3>
+      <p>Multiple bits are sent <strong>simultaneously</strong> across separate channels. Faster but requires more physical wires and suffers from signal skew over distance.</p>
+    </div>
+    <div class="card accent2">
+      <div class="card-icon">⟹</div>
+      <h3>Serial Transmission</h3>
+      <p>Bits are sent <strong>one at a time</strong> over a single channel. Simpler cabling, longer distances. Converters switch between parallel and serial as needed by hardware.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- MODES & SYNC SECTION -->
+<section id="modes">
+  <div class="section-label">02 — Modes & Synchronization</div>
+  <h2 class="section-title reveal">How data flows<br>through a channel</h2>
+
+  <div class="modes-row reveal">
+    <div class="mode-card">
+      <div class="mode-icon">→</div>
+      <h3>Simplex</h3>
+      <p>One direction only. Like a broadcast radio — the receiver can never reply.</p>
+    </div>
+    <div class="mode-card">
+      <div class="mode-icon">⇄</div>
+      <h3>Half-Duplex</h3>
+      <p>Both directions, but not simultaneously. One side transmits while the other listens — like a walkie-talkie.</p>
+    </div>
+    <div class="mode-card">
+      <div class="mode-icon">⇆</div>
+      <h3>Full-Duplex</h3>
+      <p>Simultaneous two-way communication. Both parties can talk and listen at the same time — like a phone call.</p>
+    </div>
+  </div>
+
+  <div class="grid2 reveal">
+    <div class="card">
+      <div class="card-icon">🔀</div>
+      <h3>Asynchronous Sync</h3>
+      <p>Characters are sent <strong>irregularly</strong>, each wrapped in Start and Stop bits so the receiver knows where a character begins and ends. Simple and cheap but relatively slow — used in serial ports (RS-232).</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🕐</div>
+      <h3>Synchronous Sync</h3>
+      <p>Bits are emitted at <strong>regular intervals</strong> using a shared clock signal. No start/stop overhead — continuous streams at high data rates. Required for high-speed links and fiber optics.</p>
+    </div>
+  </div>
+
+  <!-- Multiplexing -->
+  <div class="mux-box reveal">
+    <div class="mux-title">Multiplexing — sharing one medium between many users</div>
+    <div class="mux-grid">
+      <div>
+        <div class="mux-label-top" style="color:var(--c-rates);">TDM — Time Division Multiplexing</div>
+        <div class="mux-lane" id="tdm-lane"></div>
+        <p style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);margin-top:1rem;line-height:1.6;">Each user gets a <strong style="color:var(--text)">cyclic time slot</strong>. Everyone takes turns — like a round-robin token. Simple to implement, wastes bandwidth if a user has nothing to send.</p>
+      </div>
+      <div>
+        <div class="mux-label-top" style="color:var(--c-media);">FDM — Frequency Division Multiplexing</div>
+        <div class="mux-lane" id="fdm-lane"></div>
+        <p style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);margin-top:1rem;line-height:1.6;">Bandwidth is divided into <strong style="color:var(--text)">separate frequency channels</strong>, one per user. All users transmit simultaneously on their own frequency — like FM radio stations.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DATA RATES SECTION -->
+<section id="rates">
+  <div class="section-label">03 — Data Rates & Metrics</div>
+  <h2 class="section-title reveal">How much data can<br>a channel carry?</h2>
+
+  <div class="grid2 reveal">
+    <div class="card">
+      <div class="card-icon">📶</div>
+      <h3>Bandwidth (W)</h3>
+      <p>The range of frequencies a channel can transmit, calculated as the <strong>difference between upper and lower frequency limits</strong>. Measured in Hz. Higher bandwidth = more data capacity.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔢</div>
+      <h3>Valence (V)</h3>
+      <p>The number of <strong>distinct signal states</strong>. With V states, each symbol carries Q = log₂V bits of information. Binary uses V=2, giving 1 bit per symbol.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📏</div>
+      <h3>Symbol Rate (Baud)</h3>
+      <p>State changes per second. The <strong>Nyquist Criterion</strong> defines the theoretical maximum as <strong>2 × W</strong> symbols/second for a noiseless channel.</p>
+    </div>
+    <div class="card accent2">
+      <div class="card-icon">📡</div>
+      <h3>S/N Ratio</h3>
+      <p>Signal-to-Noise ratio. The <strong>higher the S/N</strong>, the more reliably data can be transmitted. Fundamental to Shannon's Theorem.</p>
+    </div>
+  </div>
+
+  <!-- Shannon Calculator -->
+  <div class="shannon-box reveal">
+    <div style="font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;">Shannon's Theorem — interactive calculator</div>
+    <div class="formula">D<sub style="font-size:0.7rem">max</sub> = W × log₂(1 + S/N)</div>
+
+    <div class="slider-row">
+      <label>Bandwidth W</label>
+      <input type="range" min="1000" max="100000" step="1000" value="20000" id="bw" oninput="calcShannon()">
+      <span id="bw-out">20,000 Hz</span>
+    </div>
+    <div class="slider-row">
+      <label>S/N Ratio</label>
+      <input type="range" min="1" max="1000" step="1" value="100" id="snr" oninput="calcShannon()">
+      <span id="snr-out">100</span>
+    </div>
+
+    <div class="result-display">
+      <span class="result-label">D_max =</span>
+      <span class="result-value" id="shannon-val">132,877</span>
+      <span class="result-unit">bits / second</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- MEDIA & DEVICES SECTION -->
+<section id="media">
+  <div class="section-label">04 — Transmission Media</div>
+  <h2 class="section-title reveal">The physical path<br>data travels through</h2>
+
+  <div class="media-grid reveal">
+
+    <div class="media-card wire">
+      <div class="media-icon">🔌</div>
+      <div class="sub">Wired</div>
+      <h3>Twisted Pair</h3>
+      <p>Two insulated copper wires twisted together. <strong>UTP</strong> (unshielded) and <strong>STP</strong> (shielded) variants. Uses RJ45 connectors. The most common LAN medium. Susceptible to interference but cheap and easy to install.</p>
+    </div>
+
+    <div class="media-card wire">
+      <div class="media-icon">📺</div>
+      <div class="sub">Wired</div>
+      <h3>Coaxial Cable</h3>
+      <p>Central conductor surrounded by insulation and a braided shield. Uses <strong>BNC connectors</strong>. Low interference, higher bandwidth than twisted pair. Used in cable TV and older Ethernet (10BASE2).</p>
+    </div>
+
+    <div class="media-card wire">
+      <div class="media-icon">💡</div>
+      <div class="sub">Wired</div>
+      <h3>Optical Fiber</h3>
+      <p>Transmits data as <strong>light pulses</strong>. Extremely high bandwidth, immune to electromagnetic interference, supports very long distances. Ideal for backbone networks and intercontinental links.</p>
+    </div>
+
+    <div class="media-card wireless">
+      <div class="media-icon">📶</div>
+      <div class="sub">Wireless</div>
+      <h3>Radio Waves (Wi-Fi)</h3>
+      <p>Uses electromagnetic radio waves. <strong>802.11ax (Wi-Fi 6)</strong> is a current standard, offering multi-gigabit speeds. Range limited by walls, interference, and distance.</p>
+    </div>
+
+    <div class="media-card wireless">
+      <div class="media-icon">🔦</div>
+      <div class="sub">Wireless</div>
+      <h3>Laser (Line-of-Sight)</h3>
+      <p>High-bandwidth laser beam transmission. Requires a <strong>clear optical path</strong> between sender and receiver. Used in point-to-point building-to-building links and free-space optical communication.</p>
+    </div>
+
+    <div class="media-card" style="border:1px dashed var(--border);background:transparent;display:flex;align-items:center;justify-content:center;min-height:180px;">
+      <p style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--muted);text-align:center;line-height:1.7;">Each medium offers different tradeoffs in <strong style="color:var(--text)">speed</strong>, <strong style="color:var(--text)">distance</strong>, <strong style="color:var(--text)">cost</strong>, and <strong style="color:var(--text)">interference resistance</strong>.</p>
+    </div>
+
+  </div>
+
+  <div class="section-label" style="margin-top:4rem;">04b — Interconnection Devices</div>
+  <h2 class="section-title" style="margin-bottom:2rem;">Hardware at<br>the Physical Layer</h2>
+
+  <div class="device-row reveal">
+    <div class="device-card">
+      <h3>NIC</h3>
+      <div class="device-label">Network Interface Card</div>
+      <p>Connects a device to the network. Identified by a <strong>unique 6-byte MAC address</strong> burned in at manufacture. Every networked device has one — the fundamental identity at Layer 2.</p>
+    </div>
+    <div class="device-card">
+      <h3>Hub</h3>
+      <div class="device-label">Signal Repeater / Broadcaster</div>
+      <p>Receives a signal from one port and <strong>broadcasts it to all other ports</strong>. Acts as a repeater/amplifier. No intelligence — no routing, no filtering. Creates a single collision domain.</p>
+    </div>
+    <div class="device-card">
+      <h3>Modem</h3>
+      <div class="device-label">Modulator-Demodulator</div>
+      <p>Converts <strong>digital computer data to analog</strong> signals for transmission over analog networks (like telephone lines), then converts back. Essential for DSL and cable internet connections.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- QUIZ SECTION -->
+<section id="quiz">
+  <div class="section-label">05 — Knowledge Check</div>
+  <h2 class="section-title reveal">Test yourself</h2>
+  <div id="quizContainer" class="reveal"></div>
+</section>
+
+<footer>
+  <p>Physical Layer · OSI Layer 1 · Chapter 1 · Communication Networks<br>
+  NTIC Faculty, University of Constantine 2 — Prof. Nabil Belala · 2025</p>
+</footer>
+
+<script>
+// ─── CURSOR ───────────────────────────────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function animCursor() {
+  rx += (mx-rx)*0.12; ry += (my-ry)*0.12;
+  cursor.style.transform = `translate(${mx-6}px,${my-6}px)`;
+  ring.style.transform = `translate(${rx-18}px,${ry-18}px)`;
+  requestAnimationFrame(animCursor);
+})();
+
+// ─── PROGRESS BAR ─────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+});
+
+// ─── ACCORDION ────────────────────────────────────────────────────────────────
+function toggleAcc(header) {
+  const item = header.parentElement;
+  item.classList.toggle('open');
+}
+
+// ─── SCROLL REVEAL ────────────────────────────────────────────────────────────
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// ─── WAVE DRAWING ─────────────────────────────────────────────────────────────
+function drawWave(id, fn, color) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const W = canvas.offsetWidth || 400, H = 60;
+  canvas.width = W * 2; canvas.height = H * 2;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
+  ctx.clearRect(0, 0, W, H);
+  ctx.strokeStyle = color || '#7c6aff';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for (let x = 0; x < W; x++) {
+    const y = fn(x / W, x, W, H);
+    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+
+function initWaves() {
+  drawWave('c-am', (t, x, W, H) => {
+    const amp = 0.1 + 0.33 * Math.abs(Math.sin(Math.PI * t * 2.5));
+    return H/2 + H * amp * Math.sin(2 * Math.PI * 12 * t);
+  }, '#ff6b6b');
+
+  drawWave('c-fm', (t, x, W, H) => {
+    const freq = t < 0.5 ? 6 : 16;
+    return H/2 + H * 0.35 * Math.sin(2 * Math.PI * freq * t);
+  }, '#ff9f43');
+
+  drawWave('c-pm', (t, x, W, H) => {
+    const phase = t < 0.5 ? 0 : Math.PI;
+    return H/2 + H * 0.35 * Math.sin(2 * Math.PI * 7 * t + phase);
+  }, '#ffd93d');
+
+  drawWave('c-nrz', (t, x, W, H) => {
+    const bits = [1,0,1,1,0,0,1,0,1,1];
+    const idx = Math.floor(t * bits.length);
+    return bits[Math.min(idx, bits.length-1)] ? H * 0.2 : H * 0.8;
+  }, '#6bcb77');
+
+  drawWave('c-manchester', (t, x, W, H) => {
+    const bits = [1,0,1,1,0,0,1,0,1,1];
+    const idx = Math.floor(t * bits.length);
+    const sub = t * bits.length - idx;
+    const b = bits[Math.min(idx, bits.length-1)];
+    return b ? (sub < 0.5 ? H*0.2 : H*0.8) : (sub < 0.5 ? H*0.8 : H*0.2);
+  }, '#4ecdc4');
+}
+setTimeout(initWaves, 150);
+
+// ─── MUX VISUALIZATION ────────────────────────────────────────────────────────
+function buildMux() {
+  const users = ['User A', 'User B', 'User C', 'User D'];
+  const colors = ['rgba(255,107,107,', 'rgba(107,203,119,', 'rgba(69,183,209,', 'rgba(167,139,250,'];
+
+  const tdm = document.getElementById('tdm-lane');
+  if (!tdm) return;
+  // TDM: time slots in sequence
+  for (let round = 0; round < 2; round++) {
+    users.forEach((u, i) => {
+      const slot = document.createElement('div');
+      slot.className = 'mux-slot';
+      slot.style.background = colors[i] + '0.25)';
+      slot.style.border = '1px solid ' + colors[i] + '0.6)';
+      slot.style.color = colors[i] + '1)';
+      slot.textContent = u + ' (t' + (round*4+i+1) + ')';
+      tdm.appendChild(slot);
+    });
+  }
+
+  const fdm = document.getElementById('fdm-lane');
+  users.forEach((u, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'mux-slot';
+    const freqs = ['f1: 0–5 kHz', 'f2: 5–10 kHz', 'f3: 10–15 kHz', 'f4: 15–20 kHz'];
+    slot.style.background = colors[i] + '0.25)';
+    slot.style.border = '1px solid ' + colors[i] + '0.6)';
+    slot.style.color = colors[i] + '1)';
+    slot.style.height = '30px';
+    slot.textContent = u + ' — ' + freqs[i];
+    fdm.appendChild(slot);
+  });
+}
+buildMux();
+
+// ─── SHANNON CALCULATOR ───────────────────────────────────────────────────────
+function calcShannon() {
+  const W = parseInt(document.getElementById('bw').value);
+  const SN = parseInt(document.getElementById('snr').value);
+  const dmax = Math.round(W * Math.log2(1 + SN));
+  document.getElementById('bw-out').textContent = W.toLocaleString() + ' Hz';
+  document.getElementById('snr-out').textContent = SN;
+  document.getElementById('shannon-val').textContent = dmax.toLocaleString();
+}
+calcShannon();
+
+// ─── QUIZ ─────────────────────────────────────────────────────────────────────
+const questions = [
+  {
+    q: "Which modulation technique encodes information by changing the signal's amplitude?",
+    options: ["Frequency Modulation", "Phase Modulation", "Amplitude Modulation", "Manchester Encoding"],
+    answer: 2,
+    explanation: "Amplitude Modulation (AM) changes the strength (amplitude) of the carrier wave to encode data. High amplitude = 1, Low amplitude = 0."
+  },
+  {
+    q: "In Manchester Encoding, a logical 1 is represented by...",
+    options: ["High voltage level", "Low voltage level", "A low-to-high transition", "A high-to-low transition"],
+    answer: 2,
+    explanation: "Manchester encoding represents logic based on transitions: a low-to-high transition = 1, high-to-low = 0. Every bit period contains a transition, enabling self-clocking."
+  },
+  {
+    q: "Shannon's Theorem formula D_max = W × log₂(1 + S/N) gives you...",
+    options: [
+      "The symbol rate of the channel",
+      "The theoretical maximum bit rate for a noisy channel",
+      "The bandwidth required for a given signal",
+      "The signal-to-noise ratio"
+    ],
+    answer: 1,
+    explanation: "Shannon's Theorem calculates the maximum achievable bit rate (D_max) for a channel given its bandwidth W and signal-to-noise ratio S/N. It's the fundamental limit — you can never exceed it."
+  },
+  {
+    q: "Full-duplex communication means...",
+    options: [
+      "Data travels in one direction only",
+      "Both parties can communicate, but not at the same time",
+      "Both parties can transmit and receive simultaneously",
+      "Data is split across multiple frequencies"
+    ],
+    answer: 2,
+    explanation: "Full-duplex allows simultaneous two-way communication — both parties can talk and listen at the same time, like a phone call. This is unlike half-duplex (walkie-talkie) or simplex (radio broadcast)."
+  },
+  {
+    q: "Which transmission medium uses light pulses and offers the highest bandwidth?",
+    options: ["Twisted Pair (UTP)", "Coaxial Cable", "Radio Waves", "Optical Fiber"],
+    answer: 3,
+    explanation: "Optical Fiber transmits data as light pulses, offering extremely high bandwidth, very long distances, and immunity to electromagnetic interference. It's ideal for backbone networks."
+  },
+  {
+    q: "TDM (Time Division Multiplexing) works by...",
+    options: [
+      "Dividing bandwidth into separate frequency channels",
+      "Allocating cyclic time slots to each user",
+      "Compressing data before transmission",
+      "Using multiple physical wires simultaneously"
+    ],
+    answer: 1,
+    explanation: "TDM allocates specific cyclic time slots to each user on the shared medium. Everyone takes turns in a round-robin fashion — simple to implement but can waste bandwidth if a user has nothing to send."
+  },
+  {
+    q: "What does a Hub do at the Physical Layer?",
+    options: [
+      "Routes packets to their destination IP",
+      "Converts digital data to analog signals",
+      "Broadcasts incoming signals to all connected ports",
+      "Filters traffic using MAC addresses"
+    ],
+    answer: 2,
+    explanation: "A Hub broadcasts signals from one port to all other ports — it's a simple repeater with no routing or filtering intelligence. This creates a single collision domain where only one device can send at a time."
+  },
+  {
+    q: "What is the Nyquist Criterion's maximum symbol rate for a channel with bandwidth W?",
+    options: ["W symbols/sec", "W/2 symbols/sec", "2W symbols/sec", "4W symbols/sec"],
+    answer: 2,
+    explanation: "The Nyquist Criterion states that the maximum symbol rate (baud rate) for a noiseless channel is 2 × W, where W is the bandwidth in Hz. This is the theoretical ceiling before Shannon considers noise."
+  }
+];
+
+let current = 0, score = 0, answered = false;
+
+function renderQuiz() {
+  const q = questions[current];
+  document.getElementById('quizContainer').innerHTML = `
+    <div class="quiz-card">
+      <div class="quiz-q">
+        <span>Question ${current+1} of ${questions.length}</span>
+        ${q.q}
+      </div>
+      <div class="quiz-options">
+        ${q.options.map((o,i) => `<button class="quiz-opt" onclick="doAnswer(${i})">${o}</button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="qfb"></div>
+      <div class="quiz-nav">
+        ${current < questions.length-1
+          ? `<button class="btn btn-secondary" id="nextBtn" onclick="nextQ()" style="display:none">Next →</button>`
+          : `<button class="btn btn-primary" id="nextBtn" onclick="showResult()" style="display:none">See Results</button>`
+        }
+        <div class="quiz-score">Score: ${score}/${current}</div>
+      </div>
+    </div>
+  `;
+  answered = false;
+}
+
+function doAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  document.querySelectorAll('.quiz-opt').forEach((o,i) => {
+    if (i === q.answer) o.classList.add('correct');
+    else if (i === idx) o.classList.add('wrong');
+    o.onclick = null;
+  });
+  const fb = document.getElementById('qfb');
+  if (idx === q.answer) {
+    score++;
+    fb.className = 'quiz-feedback show good';
+    fb.innerHTML = '✓ Correct! ' + q.explanation;
+  } else {
+    fb.className = 'quiz-feedback show bad';
+    fb.innerHTML = '✗ Not quite. ' + q.explanation;
+  }
+  document.getElementById('nextBtn').style.display = 'inline-block';
+  document.querySelector('.quiz-score').textContent = `Score: ${score}/${current+1}`;
+}
+
+function nextQ() { current++; renderQuiz(); }
+
+function showResult() {
+  const pct = Math.round(score/questions.length*100);
+  const grade = pct===100 ? '🏆 Perfect!' : pct>=70 ? '✅ Well done!' : '📚 Keep studying!';
+  document.getElementById('quizContainer').innerHTML = `
+    <div class="quiz-card" style="text-align:center">
+      <div style="font-size:4rem;margin-bottom:1rem">${grade.split(' ')[0]}</div>
+      <h2 style="font-size:2rem;margin-bottom:0.5rem">${score} / ${questions.length}</h2>
+      <p style="font-family:'Space Mono',monospace;font-size:0.8rem;color:var(--muted);margin-bottom:2rem">${pct}% — ${grade.split(' ').slice(1).join(' ')}</p>
+      <button class="btn btn-primary" onclick="restartQuiz()">Try Again</button>
+    </div>
+  `;
+}
+
+function restartQuiz() { current=0; score=0; answered=false; renderQuiz(); }
+
+renderQuiz();
+</script>
+</body>
+</html>

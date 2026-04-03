@@ -1,1121 +1,1504 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OSI Model — Interactive Learning</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0a0a0f;
-    --bg2: #12121a;
-    --bg3: #1a1a26;
-    --border: #2a2a3d;
-    --accent: #7c6aff;
-    --accent2: #ff6a9b;
-    --accent3: #6affcc;
-    --text: #e8e8f0;
-    --muted: #7070a0;
-    --layer1: #ff6b6b;
-    --layer2: #ff9f43;
-    --layer3: #ffd93d;
-    --layer4: #6bcb77;
-    --layer5: #4ecdc4;
-    --layer6: #45b7d1;
-    --layer7: #a78bfa;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSI Model — Interactive Learning</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #12121a;
+      --bg3: #1a1a26;
+      --border: #2a2a3d;
+      --accent: #7c6aff;
+      --accent2: #ff6a9b;
+      --accent3: #6affcc;
+      --text: #e8e8f0;
+      --muted: #7070a0;
+      --layer1: #ff6b6b;
+      --layer2: #ff9f43;
+      --layer3: #ffd93d;
+      --layer4: #6bcb77;
+      --layer5: #4ecdc4;
+      --layer6: #45b7d1;
+      --layer7: #a78bfa;
+    }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-  html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+    }
 
-  ::-webkit-scrollbar { width: 10px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    overflow-x: hidden;
-    cursor: none;
-  }
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
 
-  /* Custom cursor */
-  .cursor {
-    width: 12px; height: 12px;
-    background: var(--accent);
-    border-radius: 50%;
-    position: fixed; top: 0; left: 0;
-    pointer-events: none; z-index: 9999;
-    transition: transform 0.1s;
-    mix-blend-mode: screen;
-  }
-  .cursor-ring {
-    width: 36px; height: 36px;
-    border: 1px solid var(--accent);
-    border-radius: 50%;
-    position: fixed; top: 0; left: 0;
-    pointer-events: none; z-index: 9998;
-    transition: transform 0.15s, border-color 0.3s;
-    mix-blend-mode: screen;
-    opacity: 0.5;
-  }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 5px;
+    }
 
-  /* Grid noise background */
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image:
-      linear-gradient(rgba(124,106,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(124,106,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none; z-index: 0;
-  }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--muted);
+    }
 
-  /* HERO */
-  .hero {
-    position: relative;
-    min-height: 100vh;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    text-align: center;
-    padding: 2rem;
-    overflow: hidden;
-    z-index: 1;
-  }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
 
-  .hero-glow {
-    position: absolute;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(124,106,255,0.15) 0%, transparent 70%);
-    top: 50%; left: 50%; transform: translate(-50%, -50%);
-    animation: pulse 4s ease-in-out infinite;
-    pointer-events: none;
-  }
+    /* Custom cursor */
+    .cursor {
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.1s;
+      mix-blend-mode: screen;
+    }
 
-  @keyframes pulse {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
-    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-  }
+    .cursor-ring {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 9998;
+      transition: transform 0.15s, border-color 0.3s;
+      mix-blend-mode: screen;
+      opacity: 0.5;
+    }
 
-  .hero-tag {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.3em;
-    color: var(--accent);
-    text-transform: uppercase;
-    border: 1px solid var(--accent);
-    padding: 0.35rem 1rem;
-    border-radius: 2px;
-    margin-bottom: 2rem;
-    animation: fadeUp 0.8s ease forwards;
-    opacity: 0;
-  }
+    /* Grid noise background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124, 106, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124, 106, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
 
-  .hero h1 {
-    font-size: clamp(3rem, 10vw, 8rem);
-    font-weight: 800;
-    line-height: 0.9;
-    letter-spacing: -0.03em;
-    margin-bottom: 1.5rem;
-    animation: fadeUp 0.8s 0.2s ease forwards;
-    opacity: 0;
-  }
+    /* HERO */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      overflow: hidden;
+      z-index: 1;
+    }
 
-  .hero h1 span {
-    display: block;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
+    .hero-glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(124, 106, 255, 0.15) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: pulse 4s ease-in-out infinite;
+      pointer-events: none;
+    }
 
-  .hero-sub {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.9rem;
-    color: var(--muted);
-    max-width: 480px;
-    line-height: 1.7;
-    margin-bottom: 3rem;
-    animation: fadeUp 0.8s 0.4s ease forwards;
-    opacity: 0;
-  }
+    @keyframes pulse {
 
-  .hero-cta {
-    display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
-    animation: fadeUp 0.8s 0.6s ease forwards;
-    opacity: 0;
-  }
+      0%,
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+      }
 
-  .btn {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.8rem;
-    letter-spacing: 0.1em;
-    padding: 0.8rem 2rem;
-    border-radius: 2px;
-    text-decoration: none;
-    transition: all 0.2s;
-    display: inline-block;
-    cursor: none;
-  }
-  .btn-primary {
-    background: var(--accent);
-    color: #fff;
-    border: 1px solid var(--accent);
-    box-shadow: 0 4px 15px rgba(124, 106, 255, 0.2);
-  }
-  .btn-primary:hover { 
-    background: transparent; 
-    color: var(--accent); 
-    box-shadow: 0 0 20px rgba(124, 106, 255, 0.4);
-  }
-  .btn-secondary {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border);
-  }
-  .btn-secondary:hover { 
-    border-color: var(--accent); 
-    color: var(--accent); 
-    box-shadow: 0 0 20px rgba(124, 106, 255, 0.15);
-  }
+      50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+      }
+    }
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+    .hero-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      color: var(--accent);
+      text-transform: uppercase;
+      border: 1px solid var(--accent);
+      padding: 0.35rem 1rem;
+      border-radius: 2px;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.8s ease forwards;
+      opacity: 0;
+    }
 
-  /* Floating layers preview */
-  .hero-layers {
-    position: absolute;
-    right: -60px; top: 50%; transform: translateY(-50%);
-    display: flex; flex-direction: column; gap: 4px;
-    opacity: 0.4;
-    animation: fadeIn 1s 1s ease forwards;
-  }
-  @keyframes fadeIn { to { opacity: 0.4; } }
-  .hero-layer-bar {
-    height: 6px; border-radius: 3px;
-    animation: barWave 3s ease-in-out infinite;
-  }
-  .hero-layer-bar:nth-child(1) { width: 80px; background: var(--layer7); animation-delay: 0s; }
-  .hero-layer-bar:nth-child(2) { width: 100px; background: var(--layer6); animation-delay: 0.2s; }
-  .hero-layer-bar:nth-child(3) { width: 90px; background: var(--layer5); animation-delay: 0.4s; }
-  .hero-layer-bar:nth-child(4) { width: 110px; background: var(--layer4); animation-delay: 0.6s; }
-  .hero-layer-bar:nth-child(5) { width: 95px; background: var(--layer3); animation-delay: 0.8s; }
-  .hero-layer-bar:nth-child(6) { width: 105px; background: var(--layer2); animation-delay: 1s; }
-  .hero-layer-bar:nth-child(7) { width: 120px; background: var(--layer1); animation-delay: 1.2s; }
-  @keyframes barWave {
-    0%, 100% { transform: scaleX(1); }
-    50% { transform: scaleX(1.15); }
-  }
+    .hero h1 {
+      font-size: clamp(3rem, 10vw, 8rem);
+      font-weight: 800;
+      line-height: 0.9;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.8s 0.2s ease forwards;
+      opacity: 0;
+    }
 
-  /* SECTION WRAPPER */
-  section {
-    position: relative; z-index: 1;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 6rem 2rem;
-  }
+    .hero h1 span {
+      display: block;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
-  .section-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.4em;
-    color: var(--accent);
-    text-transform: uppercase;
-    margin-bottom: 1rem;
-    display: flex; align-items: center; gap: 1rem;
-  }
-  .section-label::after {
-    content: '';
-    flex: 1; max-width: 60px;
-    height: 1px; background: var(--accent);
-  }
+    .hero-sub {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--muted);
+      max-width: 480px;
+      line-height: 1.7;
+      margin-bottom: 3rem;
+      animation: fadeUp 0.8s 0.4s ease forwards;
+      opacity: 0;
+    }
 
-  .section-title {
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    margin-bottom: 3rem;
-    line-height: 1.1;
-  }
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp 0.8s 0.6s ease forwards;
+      opacity: 0;
+    }
 
-  /* WHY SECTION */
-  .why-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-  }
+    .btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      padding: 0.8rem 2rem;
+      border-radius: 2px;
+      text-decoration: none;
+      transition: all 0.2s;
+      display: inline-block;
+      cursor: none;
+    }
 
-  .why-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    padding: 2rem;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    cursor: none;
-  }
-  .why-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px -10px rgba(124, 106, 255, 0.15);
-  }
-  .why-card.accent { border-color: var(--accent2); background: rgba(255,106,155,0.05); }
-  .why-icon {
-    font-size: 2rem; margin-bottom: 1rem;
-  }
-  .why-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
-  .why-card p { font-family: 'Space Mono', monospace; font-size: 0.78rem; color: var(--muted); line-height: 1.7; }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: 1px solid var(--accent);
+      box-shadow: 0 4px 15px rgba(124, 106, 255, 0.2);
+    }
 
-  /* OSI STACK — INTERACTIVE */
-  .osi-stack {
-    display: flex; flex-direction: column; gap: 0;
-    border: 1px solid var(--border);
-    border-radius: 8px; overflow: hidden;
-    transition: box-shadow 0.3s ease;
-  }
-  .osi-stack:hover {
-    box-shadow: 0 10px 30px -10px rgba(124, 106, 255, 0.1);
-  }
+    .btn-primary:hover {
+      background: transparent;
+      color: var(--accent);
+      box-shadow: 0 0 20px rgba(124, 106, 255, 0.4);
+    }
 
-  .layer-card {
-    border-bottom: 1px solid var(--border);
-    cursor: none;
-    transition: background 0.25s;
-    position: relative;
-    overflow: hidden;
-  }
-  .layer-card:last-child { border-bottom: none; }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
 
-  .layer-header {
-    display: flex; align-items: center; gap: 1.5rem;
-    padding: 1.2rem 2rem;
-    user-select: none;
-  }
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 20px rgba(124, 106, 255, 0.15);
+    }
 
-  .layer-num {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.75rem;
-    font-weight: 700;
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    color: #000; font-weight: 700;
-    flex-shrink: 0;
-  }
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
 
-  .layer-name {
-    font-size: 1rem; font-weight: 700; flex: 1;
-  }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-  .layer-unit {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    margin-right: 1rem;
-  }
+    /* Floating layers preview */
+    .hero-layers {
+      position: absolute;
+      right: -60px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      opacity: 0.4;
+      animation: fadeIn 1s 1s ease forwards;
+    }
 
-  .layer-arrow {
-    font-size: 0.8rem;
-    transition: transform 0.3s;
-    color: var(--muted);
-  }
+    @keyframes fadeIn {
+      to {
+        opacity: 0.4;
+      }
+    }
 
-  .layer-card.open .layer-arrow { transform: rotate(180deg); }
+    .hero-layer-bar {
+      height: 6px;
+      border-radius: 3px;
+      animation: barWave 3s ease-in-out infinite;
+    }
 
-  .layer-body {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1);
-    background: rgba(255,255,255,0.02);
-  }
-  .layer-card.open .layer-body { max-height: 500px; }
+    .hero-layer-bar:nth-child(1) {
+      width: 80px;
+      background: var(--layer7);
+      animation-delay: 0s;
+    }
 
-  .layer-content {
-    padding: 1.5rem 2rem 2rem;
-    border-top: 1px solid var(--border);
-    display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
-  }
+    .hero-layer-bar:nth-child(2) {
+      width: 100px;
+      background: var(--layer6);
+      animation-delay: 0.2s;
+    }
 
-  .layer-desc {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.8rem;
-    color: var(--muted);
-    line-height: 1.8;
-  }
-  .layer-desc strong { color: var(--text); }
+    .hero-layer-bar:nth-child(3) {
+      width: 90px;
+      background: var(--layer5);
+      animation-delay: 0.4s;
+    }
+
+    .hero-layer-bar:nth-child(4) {
+      width: 110px;
+      background: var(--layer4);
+      animation-delay: 0.6s;
+    }
+
+    .hero-layer-bar:nth-child(5) {
+      width: 95px;
+      background: var(--layer3);
+      animation-delay: 0.8s;
+    }
+
+    .hero-layer-bar:nth-child(6) {
+      width: 105px;
+      background: var(--layer2);
+      animation-delay: 1s;
+    }
+
+    .hero-layer-bar:nth-child(7) {
+      width: 120px;
+      background: var(--layer1);
+      animation-delay: 1.2s;
+    }
+
+    @keyframes barWave {
+
+      0%,
+      100% {
+        transform: scaleX(1);
+      }
+
+      50% {
+        transform: scaleX(1.15);
+      }
+    }
+
+    /* SECTION WRAPPER */
+    section {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 6rem 2rem;
+    }
+
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.4em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      max-width: 60px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 3rem;
+      line-height: 1.1;
+    }
+
+    /* WHY SECTION */
+    .why-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .why-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      cursor: none;
+    }
+
+    .why-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px -10px rgba(124, 106, 255, 0.15);
+    }
+
+    .why-card.accent {
+      border-color: var(--accent2);
+      background: rgba(255, 106, 155, 0.05);
+    }
+
+    .why-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .why-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .why-card p {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* OSI STACK — INTERACTIVE */
+    .osi-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .osi-stack:hover {
+      box-shadow: 0 10px 30px -10px rgba(124, 106, 255, 0.1);
+    }
+
+    .layer-card {
+      border-bottom: 1px solid var(--border);
+      cursor: none;
+      transition: background 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .layer-card:last-child {
+      border-bottom: none;
+    }
+
+    .layer-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1.2rem 2rem;
+      user-select: none;
+    }
+
+    .layer-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #000;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .layer-name {
+      font-size: 1rem;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    .layer-unit {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      margin-right: 1rem;
+    }
+
+    .layer-arrow {
+      font-size: 0.8rem;
+      transition: transform 0.3s;
+      color: var(--muted);
+    }
+
+    .layer-card.open .layer-arrow {
+      transform: rotate(180deg);
+    }
+
+    .layer-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .layer-card.open .layer-body {
+      max-height: 500px;
+    }
+
+    .layer-content {
+      padding: 1.5rem 2rem 2rem;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .layer-desc {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .layer-desc strong {
+      color: var(--text);
+    }
 
 
-  .layer-protocols h4 {
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.75rem;
-    font-family: 'Space Mono', monospace;
-  }
-  .proto-tags {
-    display: flex; flex-wrap: wrap; gap: 0.4rem;
-  }
-  .proto-tag {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.7rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 2px;
-    border: 1px solid var(--border);
-    color: var(--text);
-  }
+    .layer-protocols h4 {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      font-family: 'Space Mono', monospace;
+    }
 
-  /* Layer color coding */
-  .layer-card[data-layer="7"] .layer-num { background: var(--layer7); }
-  .layer-card[data-layer="6"] .layer-num { background: var(--layer6); }
-  .layer-card[data-layer="5"] .layer-num { background: var(--layer5); }
-  .layer-card[data-layer="4"] .layer-num { background: var(--layer4); }
-  .layer-card[data-layer="3"] .layer-num { background: var(--layer3); color: #222; }
-  .layer-card[data-layer="2"] .layer-num { background: var(--layer2); color: #222; }
-  .layer-card[data-layer="1"] .layer-num { background: var(--layer1); }
+    .proto-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
 
-  .layer-card[data-layer="7"]:hover, .layer-card[data-layer="7"].open { background: rgba(167,139,250,0.05); }
-  .layer-card[data-layer="6"]:hover, .layer-card[data-layer="6"].open { background: rgba(69,183,209,0.05); }
-  .layer-card[data-layer="5"]:hover, .layer-card[data-layer="5"].open { background: rgba(78,205,196,0.05); }
-  .layer-card[data-layer="4"]:hover, .layer-card[data-layer="4"].open { background: rgba(107,203,119,0.05); }
-  .layer-card[data-layer="3"]:hover, .layer-card[data-layer="3"].open { background: rgba(255,217,61,0.05); }
-  .layer-card[data-layer="2"]:hover, .layer-card[data-layer="2"].open { background: rgba(255,159,67,0.05); }
-  .layer-card[data-layer="1"]:hover, .layer-card[data-layer="1"].open { background: rgba(255,107,107,0.05); }
+    .proto-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 2px;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
 
-  .layer-card[data-layer="7"] .proto-tag { border-color: var(--layer7); color: var(--layer7); }
-  .layer-card[data-layer="6"] .proto-tag { border-color: var(--layer6); color: var(--layer6); }
-  .layer-card[data-layer="5"] .proto-tag { border-color: var(--layer5); color: var(--layer5); }
-  .layer-card[data-layer="4"] .proto-tag { border-color: var(--layer4); color: var(--layer4); }
-  .layer-card[data-layer="3"] .proto-tag { border-color: var(--layer3); color: var(--layer3); }
-  .layer-card[data-layer="2"] .proto-tag { border-color: var(--layer2); color: var(--layer2); }
-  .layer-card[data-layer="1"] .proto-tag { border-color: var(--layer1); color: var(--layer1); }
+    /* Layer color coding */
+    .layer-card[data-layer="7"] .layer-num {
+      background: var(--layer7);
+    }
 
-  /* ENCAPSULATION VIZ */
+    .layer-card[data-layer="6"] .layer-num {
+      background: var(--layer6);
+    }
+
+    .layer-card[data-layer="5"] .layer-num {
+      background: var(--layer5);
+    }
+
+    .layer-card[data-layer="4"] .layer-num {
+      background: var(--layer4);
+    }
+
+    .layer-card[data-layer="3"] .layer-num {
+      background: var(--layer3);
+      color: #222;
+    }
+
+    .layer-card[data-layer="2"] .layer-num {
+      background: var(--layer2);
+      color: #222;
+    }
+
+    .layer-card[data-layer="1"] .layer-num {
+      background: var(--layer1);
+    }
+
+    .layer-card[data-layer="7"]:hover,
+    .layer-card[data-layer="7"].open {
+      background: rgba(167, 139, 250, 0.05);
+    }
+
+    .layer-card[data-layer="6"]:hover,
+    .layer-card[data-layer="6"].open {
+      background: rgba(69, 183, 209, 0.05);
+    }
+
+    .layer-card[data-layer="5"]:hover,
+    .layer-card[data-layer="5"].open {
+      background: rgba(78, 205, 196, 0.05);
+    }
+
+    .layer-card[data-layer="4"]:hover,
+    .layer-card[data-layer="4"].open {
+      background: rgba(107, 203, 119, 0.05);
+    }
+
+    .layer-card[data-layer="3"]:hover,
+    .layer-card[data-layer="3"].open {
+      background: rgba(255, 217, 61, 0.05);
+    }
+
+    .layer-card[data-layer="2"]:hover,
+    .layer-card[data-layer="2"].open {
+      background: rgba(255, 159, 67, 0.05);
+    }
+
+    .layer-card[data-layer="1"]:hover,
+    .layer-card[data-layer="1"].open {
+      background: rgba(255, 107, 107, 0.05);
+    }
+
+    .layer-card[data-layer="7"] .proto-tag {
+      border-color: var(--layer7);
+      color: var(--layer7);
+    }
+
+    .layer-card[data-layer="6"] .proto-tag {
+      border-color: var(--layer6);
+      color: var(--layer6);
+    }
+
+    .layer-card[data-layer="5"] .proto-tag {
+      border-color: var(--layer5);
+      color: var(--layer5);
+    }
+
+    .layer-card[data-layer="4"] .proto-tag {
+      border-color: var(--layer4);
+      color: var(--layer4);
+    }
+
+    .layer-card[data-layer="3"] .proto-tag {
+      border-color: var(--layer3);
+      color: var(--layer3);
+    }
+
+    .layer-card[data-layer="2"] .proto-tag {
+      border-color: var(--layer2);
+      color: var(--layer2);
+    }
+
+    .layer-card[data-layer="1"] .proto-tag {
+      border-color: var(--layer1);
+      color: var(--layer1);
+    }
+
+    /* ENCAPSULATION VIZ */
 
 
-  .encap-anim {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 3rem 2rem;
-    text-align: center;
-    margin-bottom: 2rem;
-    transition: all 0.3s ease;
-  }
-  .encap-anim:hover {
-    border-color: var(--accent);
-    box-shadow: 0 10px 30px -10px rgba(124, 106, 255, 0.1);
-  }
+    .encap-anim {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 3rem 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      transition: all 0.3s ease;
+    }
 
-  .encap-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    margin: 0.4rem auto;
-    max-width: 700px;
-    opacity: 0;
-    transform: translateX(-20px);
-    transition: opacity 0.5s, transform 0.5s;
-  }
-  .encap-row.visible { opacity: 1; transform: translateX(0); }
+    .encap-anim:hover {
+      border-color: var(--accent);
+      box-shadow: 0 10px 30px -10px rgba(124, 106, 255, 0.1);
+    }
 
-  .encap-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.7rem;
-    width: 80px; text-align: right;
-    padding-right: 1rem;
-    color: var(--muted);
-    flex-shrink: 0;
-  }
+    .encap-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin: 0.4rem auto;
+      max-width: 700px;
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: opacity 0.5s, transform 0.5s;
+    }
 
-  .encap-header {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 0.4rem 0.6rem;
-    border-radius: 3px;
-    flex-shrink: 0;
-    letter-spacing: 0.05em;
-  }
+    .encap-row.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
 
-  .encap-data {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    padding: 0.4rem 1.2rem;
-    border-radius: 3px;
-    color: var(--muted);
-    flex: 1;
-  }
+    .encap-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      width: 80px;
+      text-align: right;
+      padding-right: 1rem;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
 
-  .encap-btn {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.75rem;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 0.7rem 1.5rem;
-    border-radius: 2px;
-    cursor: none;
-    transition: all 0.2s;
-    margin-top: 1.5rem;
-  }
-  .encap-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .encap-header {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.4rem 0.6rem;
+      border-radius: 3px;
+      flex-shrink: 0;
+      letter-spacing: 0.05em;
+    }
 
-  /* QUIZ */
+    .encap-data {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 0.4rem 1.2rem;
+      border-radius: 3px;
+      color: var(--muted);
+      flex: 1;
+    }
+
+    .encap-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.7rem 1.5rem;
+      border-radius: 2px;
+      cursor: none;
+      transition: all 0.2s;
+      margin-top: 1.5rem;
+    }
+
+    .encap-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* QUIZ */
 
 
-  .quiz-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 2.5rem;
-    margin-bottom: 1rem;
-    transition: all 0.3s ease;
-  }
-  .quiz-card:hover {
-    border-color: var(--accent);
-    box-shadow: 0 10px 30px -10px rgba(124, 106, 255, 0.1);
-  }
+    .quiz-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
 
-  .quiz-q {
-    font-size: 1.05rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    line-height: 1.4;
-  }
-  .quiz-q span {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--accent);
-    letter-spacing: 0.2em;
-    display: block;
-    margin-bottom: 0.5rem;
-  }
+    .quiz-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 10px 30px -10px rgba(124, 106, 255, 0.1);
+    }
 
-  .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .quiz-q {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+    }
 
-  .quiz-opt {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.78rem;
-    padding: 0.9rem 1.2rem;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    cursor: none;
-    transition: all 0.2s;
-    text-align: left;
-    color: var(--text);
-  }
-  .quiz-opt:hover { 
-    border-color: var(--accent); 
-    box-shadow: 0 4px 15px rgba(124, 106, 255, 0.15);
-  }
-  .quiz-opt.correct { border-color: var(--accent3); color: var(--accent3); background: rgba(106,255,204,0.07); }
-  .quiz-opt.wrong { border-color: var(--accent2); color: var(--accent2); background: rgba(255,106,155,0.07); }
+    .quiz-q span {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
 
-  .quiz-feedback {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.78rem;
-    margin-top: 1rem;
-    padding: 0.8rem 1rem;
-    border-radius: 3px;
-    display: none;
-    line-height: 1.6;
-  }
-  .quiz-feedback.show { display: block; }
-  .quiz-feedback.good { background: rgba(106,255,204,0.1); color: var(--accent3); border: 1px solid rgba(106,255,204,0.2); }
-  .quiz-feedback.bad { background: rgba(255,106,155,0.1); color: var(--accent2); border: 1px solid rgba(255,106,155,0.2); }
+    .quiz-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
 
-  .quiz-nav {
-    display: flex; gap: 1rem; margin-top: 1.5rem; align-items: center;
-  }
-  .quiz-score {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.78rem;
-    color: var(--muted);
-    margin-left: auto;
-  }
+    .quiz-opt {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      padding: 0.9rem 1.2rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      cursor: none;
+      transition: all 0.2s;
+      text-align: left;
+      color: var(--text);
+    }
 
-  /* DIVIDER */
-  .divider {
-    width: 100%; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--border), transparent);
-    position: relative; z-index: 1;
-  }
+    .quiz-opt:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 15px rgba(124, 106, 255, 0.15);
+    }
 
-  /* FOOTER */
-  footer {
-    position: relative; z-index: 1;
-    text-align: center;
-    padding: 3rem 2rem;
-    border-top: 1px solid var(--border);
-  }
-  footer p {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--muted);
-  }
+    .quiz-opt.correct {
+      border-color: var(--accent3);
+      color: var(--accent3);
+      background: rgba(106, 255, 204, 0.07);
+    }
 
-  /* NAV */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    padding: 1.2rem 2.5rem;
-    display: flex; align-items: center; justify-content: space-between;
-    background: rgba(10,10,15,0.85);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border);
-  }
-  .nav-logo {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-  }
-  .nav-logo span { color: var(--accent); }
+    .quiz-opt.wrong {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      background: rgba(255, 106, 155, 0.07);
+    }
 
-  .nav-links { display: flex; gap: 2rem; }
-  .nav-links a {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.72rem;
-    color: var(--muted);
-    text-decoration: none;
-    letter-spacing: 0.08em;
-    transition: color 0.2s;
-    cursor: none;
-  }
-  .nav-links a:hover { color: var(--text); }
-  .nav-links a.active { color: var(--accent); }
+    .quiz-feedback {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      margin-top: 1rem;
+      padding: 0.8rem 1rem;
+      border-radius: 3px;
+      display: none;
+      line-height: 1.6;
+    }
 
-  /* PROGRESS BAR */
-  .progress-bar {
-    position: fixed; top: 0; left: 0;
-    height: 3px; background: var(--accent);
-    z-index: 200;
-    transition: width 0.1s;
-    box-shadow: 0 0 10px var(--accent);
-  }
+    .quiz-feedback.show {
+      display: block;
+    }
 
-  /* Scroll reveal */
-  .reveal {
-    opacity: 0; transform: translateY(30px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-  .reveal.in { opacity: 1; transform: translateY(0); }
+    .quiz-feedback.good {
+      background: rgba(106, 255, 204, 0.1);
+      color: var(--accent3);
+      border: 1px solid rgba(106, 255, 204, 0.2);
+    }
 
-  @media (max-width: 700px) {
-    .why-grid, .quiz-options, .layer-content { grid-template-columns: 1fr; }
-    .hero-layers { display: none; }
-    .layer-header { padding: 1rem; }
-    nav .nav-links { display: none; }
-  }
-</style>
+    .quiz-feedback.bad {
+      background: rgba(255, 106, 155, 0.1);
+      color: var(--accent2);
+      border: 1px solid rgba(255, 106, 155, 0.2);
+    }
+
+    .quiz-nav {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      align-items: center;
+    }
+
+    .quiz-score {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    /* DIVIDER */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* FOOTER */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 3rem 2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    footer p {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1.2rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+    }
+
+    .nav-logo span {
+      color: var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      transition: color 0.2s;
+      cursor: none;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .nav-links a.active {
+      color: var(--accent);
+    }
+
+    /* PROGRESS BAR */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: var(--accent);
+      z-index: 200;
+      transition: width 0.1s;
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 700px) {
+
+      .why-grid,
+      .quiz-options,
+      .layer-content {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-layers {
+        display: none;
+      }
+
+      .layer-header {
+        padding: 1rem;
+      }
+
+      nav .nav-links {
+        display: none;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="cursor" id="cursor"></div>
-<div class="cursor-ring" id="cursorRing"></div>
-<div class="progress-bar" id="progressBar"></div>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+  <div class="progress-bar" id="progressBar"></div>
 
-<nav>
-  <div class="nav-logo">OSI<span>.</span>LEARN</div>
-  <div class="nav-links" style="display: flex; gap: 1rem; align-items: center;">
-    <a href="osi_model.html" class="active">Overview</a>
-    <a href="physical_layer_interactive_lesson.html">Layer 1</a>
-    <span style="color:var(--border);">|</span>
-    <a href="#why">Why</a>
-    <a href="#layers">Layers</a>
-    <a href="#encapsulation">Encapsulation</a>
-    <a href="#quiz">Quiz</a>
-  </div>
-</nav>
-
-<!-- HERO -->
-<div class="hero">
-  <div class="hero-glow"></div>
-  <div class="hero-layers">
-    <div class="hero-layer-bar"></div>
-    <div class="hero-layer-bar"></div>
-    <div class="hero-layer-bar"></div>
-    <div class="hero-layer-bar"></div>
-    <div class="hero-layer-bar"></div>
-    <div class="hero-layer-bar"></div>
-    <div class="hero-layer-bar"></div>
-  </div>
-  <div class="hero-tag">Chapter 2 · Communication Networks</div>
-  <h1>The OSI<br><span>Reference Model</span></h1>
-  <p class="hero-sub">How does a laptop in Algeria talk to a server in Tokyo? A 7-layer framework that makes it all possible.</p>
-  <div class="hero-cta">
-    <a href="#why" class="btn btn-primary">Start Learning</a>
-    <a href="#quiz" class="btn btn-secondary">Take the Quiz</a>
-  </div>
-</div>
-
-<div class="divider"></div>
-
-<!-- WHY SECTION -->
-<section id="why">
-  <div class="section-label">01 — Problem</div>
-  <h2 class="section-title reveal">Why do we need<br>standardization?</h2>
-  <div class="why-grid reveal">
-    <div class="why-card">
-      <div class="why-icon">⚡</div>
-      <h3>Heterogeneous Devices</h3>
-      <p>Computing equipment comes from <strong>different manufacturers</strong> using different software platforms and communication protocols. A MacBook and a Windows server speak completely different native languages.</p>
+  <nav>
+    <div class="nav-logo">OSI<span>.</span>LEARN</div>
+    <div class="nav-links" style="display: flex; gap: 1rem; align-items: center;">
+      <a href="osi_model.html" style="color:var(--text);">Overview</a>
+      <a href="physical_layer.html">Layer 1</a>
+      <a href="network_layer.html">Layer 3</a>
+      <span style="color:var(--border);">|</span>
+      <a href="#why">Why</a>
+      <a href="#layers">Layers</a>
+      <a href="#encapsulation">Encapsulation</a>
+      <a href="#quiz">Quiz</a>
     </div>
-    <div class="why-card accent">
-      <div class="why-icon">❓</div>
-      <h3>The Core Problem</h3>
-      <p>How do you make heterogeneous equipment communicate when they <strong>don't speak the same language</strong>? Without a shared ruleset, every device would be an island.</p>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-layers">
+      <div class="hero-layer-bar"></div>
+      <div class="hero-layer-bar"></div>
+      <div class="hero-layer-bar"></div>
+      <div class="hero-layer-bar"></div>
+      <div class="hero-layer-bar"></div>
+      <div class="hero-layer-bar"></div>
+      <div class="hero-layer-bar"></div>
     </div>
-    <div class="why-card">
-      <div class="why-icon">✅</div>
-      <h3>The Solution: OSI</h3>
-      <p>ISO (International Standards Organization) defined a <strong>reference model</strong> called Open Systems Interconnection (OSI) — a universal blueprint for network communication.</p>
-    </div>
-    <div class="why-card">
-      <div class="why-icon">📦</div>
-      <h3>7 Layers, 1 Goal</h3>
-      <p>The model organizes communication into <strong>7 distinct layers</strong>, each with a specific job. Hardware and software cooperate across these layers to move data from one end to the other.</p>
+    <div class="hero-tag">Chapter 2 · Communication Networks</div>
+    <h1>The OSI<br><span>Reference Model</span></h1>
+    <p class="hero-sub">How does a laptop in Algeria talk to a server in Tokyo? A 7-layer framework that makes it all
+      possible.</p>
+    <div class="hero-cta">
+      <a href="#why" class="btn btn-primary">Start Learning</a>
+      <a href="#quiz" class="btn btn-secondary">Take the Quiz</a>
     </div>
   </div>
-</section>
 
-<div class="divider"></div>
+  <div class="divider"></div>
 
-<!-- LAYERS SECTION -->
-<section id="layers">
-  <div class="section-label">02 — The Stack</div>
-  <h2 class="section-title reveal">The 7 Layers<br>— click to explore</h2>
-
-  <div class="osi-stack reveal">
-
-    <div class="layer-card" data-layer="7">
-      <div class="layer-header" onclick="toggleLayer(this)">
-        <div class="layer-num">7</div>
-        <div class="layer-name">Application</div>
-        <div class="layer-unit">DATA</div>
-        <div class="layer-arrow">▼</div>
+  <!-- WHY SECTION -->
+  <section id="why">
+    <div class="section-label">01 — Problem</div>
+    <h2 class="section-title reveal">Why do we need<br>standardization?</h2>
+    <div class="why-grid reveal">
+      <div class="why-card">
+        <div class="why-icon">⚡</div>
+        <h3>Heterogeneous Devices</h3>
+        <p>Computing equipment comes from <strong>different manufacturers</strong> using different software platforms
+          and communication protocols. A MacBook and a Windows server speak completely different native languages.</p>
       </div>
-      <div class="layer-body">
-        <div class="layer-content">
-          <div class="layer-desc">
-            Serves as an <strong>interface for applications to access network services</strong>. This layer directly manages user applications — it's the part you actually see and interact with. Think email clients, browsers, file transfer utilities, and database software.
-          </div>
-          <div class="layer-protocols">
-            <h4>Common Protocols</h4>
-            <div class="proto-tags">
-              <span class="proto-tag">HTTP</span>
-              <span class="proto-tag">FTP</span>
-              <span class="proto-tag">SMTP</span>
-              <span class="proto-tag">Telnet</span>
-              <span class="proto-tag">NFS</span>
-              <span class="proto-tag">DNS</span>
+      <div class="why-card accent">
+        <div class="why-icon">❓</div>
+        <h3>The Core Problem</h3>
+        <p>How do you make heterogeneous equipment communicate when they <strong>don't speak the same language</strong>?
+          Without a shared ruleset, every device would be an island.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">✅</div>
+        <h3>The Solution: OSI</h3>
+        <p>ISO (International Standards Organization) defined a <strong>reference model</strong> called Open Systems
+          Interconnection (OSI) — a universal blueprint for network communication.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">📦</div>
+        <h3>7 Layers, 1 Goal</h3>
+        <p>The model organizes communication into <strong>7 distinct layers</strong>, each with a specific job. Hardware
+          and software cooperate across these layers to move data from one end to the other.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- LAYERS SECTION -->
+  <section id="layers">
+    <div class="section-label">02 — The Stack</div>
+    <h2 class="section-title reveal">The 7 Layers<br>— click to explore</h2>
+
+    <div class="osi-stack reveal">
+
+      <div class="layer-card" data-layer="7">
+        <div class="layer-header" onclick="toggleLayer(this)">
+          <div class="layer-num">7</div>
+          <div class="layer-name">Application</div>
+          <div class="layer-unit">DATA</div>
+          <div class="layer-arrow">▼</div>
+        </div>
+        <div class="layer-body">
+          <div class="layer-content">
+            <div class="layer-desc">
+              Serves as an <strong>interface for applications to access network services</strong>. This layer directly
+              manages user applications — it's the part you actually see and interact with. Think email clients,
+              browsers, file transfer utilities, and database software.
+            </div>
+            <div class="layer-protocols">
+              <h4>Common Protocols</h4>
+              <div class="proto-tags">
+                <span class="proto-tag">HTTP</span>
+                <span class="proto-tag">FTP</span>
+                <span class="proto-tag">SMTP</span>
+                <span class="proto-tag">Telnet</span>
+                <span class="proto-tag">NFS</span>
+                <span class="proto-tag">DNS</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="layer-card" data-layer="6">
-      <div class="layer-header" onclick="toggleLayer(this)">
-        <div class="layer-num">6</div>
-        <div class="layer-name">Presentation</div>
-        <div class="layer-unit">DATA</div>
-        <div class="layer-arrow">▼</div>
-      </div>
-      <div class="layer-body">
-        <div class="layer-content">
-          <div class="layer-desc">
-            Determines the <strong>intermediate format used for exchanging data</strong> between computers. Acts as a translator for the application layer — handling encoding, compression, and encryption so that data is presented in a format the receiving system understands.
-          </div>
-          <div class="layer-protocols">
-            <h4>Common Protocols & Formats</h4>
-            <div class="proto-tags">
-              <span class="proto-tag">ASN.1</span>
-              <span class="proto-tag">SSL/TLS</span>
-              <span class="proto-tag">JPEG</span>
-              <span class="proto-tag">MPEG</span>
+      <div class="layer-card" data-layer="6">
+        <div class="layer-header" onclick="toggleLayer(this)">
+          <div class="layer-num">6</div>
+          <div class="layer-name">Presentation</div>
+          <div class="layer-unit">DATA</div>
+          <div class="layer-arrow">▼</div>
+        </div>
+        <div class="layer-body">
+          <div class="layer-content">
+            <div class="layer-desc">
+              Determines the <strong>intermediate format used for exchanging data</strong> between computers. Acts as a
+              translator for the application layer — handling encoding, compression, and encryption so that data is
+              presented in a format the receiving system understands.
+            </div>
+            <div class="layer-protocols">
+              <h4>Common Protocols & Formats</h4>
+              <div class="proto-tags">
+                <span class="proto-tag">ASN.1</span>
+                <span class="proto-tag">SSL/TLS</span>
+                <span class="proto-tag">JPEG</span>
+                <span class="proto-tag">MPEG</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="layer-card" data-layer="5">
-      <div class="layer-header" onclick="toggleLayer(this)">
-        <div class="layer-num">5</div>
-        <div class="layer-name">Session</div>
-        <div class="layer-unit">DATA</div>
-        <div class="layer-arrow">▼</div>
-      </div>
-      <div class="layer-body">
-        <div class="layer-content">
-          <div class="layer-desc">
-            Allows two remote applications to <strong>create, use, and terminate a connection</strong>. It ensures security and controls the dialogue between communicating processes — deciding when and for how long transmission takes place.
-          </div>
-          <div class="layer-protocols">
-            <h4>Common Protocols</h4>
-            <div class="proto-tags">
-              <span class="proto-tag">NetBIOS</span>
-              <span class="proto-tag">RPC</span>
-              <span class="proto-tag">Session protocols</span>
+      <div class="layer-card" data-layer="5">
+        <div class="layer-header" onclick="toggleLayer(this)">
+          <div class="layer-num">5</div>
+          <div class="layer-name">Session</div>
+          <div class="layer-unit">DATA</div>
+          <div class="layer-arrow">▼</div>
+        </div>
+        <div class="layer-body">
+          <div class="layer-content">
+            <div class="layer-desc">
+              Allows two remote applications to <strong>create, use, and terminate a connection</strong>. It ensures
+              security and controls the dialogue between communicating processes — deciding when and for how long
+              transmission takes place.
+            </div>
+            <div class="layer-protocols">
+              <h4>Common Protocols</h4>
+              <div class="proto-tags">
+                <span class="proto-tag">NetBIOS</span>
+                <span class="proto-tag">RPC</span>
+                <span class="proto-tag">Session protocols</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="layer-card" data-layer="4">
-      <div class="layer-header" onclick="toggleLayer(this)">
-        <div class="layer-num">4</div>
-        <div class="layer-name">Transport</div>
-        <div class="layer-unit">SEGMENTS</div>
-        <div class="layer-arrow">▼</div>
-      </div>
-      <div class="layer-body">
-        <div class="layer-content">
-          <div class="layer-desc">
-            Ensures packets are received <strong>without errors, in the correct order, without loss or duplication</strong>. Breaks long messages into small packets and reassembles them at the destination. Responsible for end-to-end transmission.
-          </div>
-          <div class="layer-protocols">
-            <h4>Common Protocols</h4>
-            <div class="proto-tags">
-              <span class="proto-tag">TCP</span>
-              <span class="proto-tag">UDP</span>
-              <span class="proto-tag">NetBEUI</span>
-              <span class="proto-tag">IPX/SPX</span>
+      <div class="layer-card" data-layer="4">
+        <div class="layer-header" onclick="toggleLayer(this)">
+          <div class="layer-num">4</div>
+          <div class="layer-name">Transport</div>
+          <div class="layer-unit">SEGMENTS</div>
+          <div class="layer-arrow">▼</div>
+        </div>
+        <div class="layer-body">
+          <div class="layer-content">
+            <div class="layer-desc">
+              Ensures packets are received <strong>without errors, in the correct order, without loss or
+                duplication</strong>. Breaks long messages into small packets and reassembles them at the destination.
+              Responsible for end-to-end transmission.
+            </div>
+            <div class="layer-protocols">
+              <h4>Common Protocols</h4>
+              <div class="proto-tags">
+                <span class="proto-tag">TCP</span>
+                <span class="proto-tag">UDP</span>
+                <span class="proto-tag">NetBEUI</span>
+                <span class="proto-tag">IPX/SPX</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="layer-card" data-layer="3">
-      <div class="layer-header" onclick="toggleLayer(this)">
-        <div class="layer-num">3</div>
-        <div class="layer-name">Network</div>
-        <div class="layer-unit">PACKETS</div>
-        <div class="layer-arrow">▼</div>
-      </div>
-      <div class="layer-body">
-        <div class="layer-content">
-          <div class="layer-desc">
-            Responsible for the <strong>addressing of messages</strong>. Determines the path packets must take based on the state of the network — this is <strong>routing</strong>. Every router in the internet operates primarily at this layer.
-          </div>
-          <div class="layer-protocols">
-            <h4>Common Protocols</h4>
-            <div class="proto-tags">
-              <span class="proto-tag">IP</span>
-              <span class="proto-tag">ICMP</span>
-              <span class="proto-tag">CLNP</span>
-              <span class="proto-tag">RIP</span>
-              <span class="proto-tag">OSPF</span>
+      <div class="layer-card" data-layer="3">
+        <div class="layer-header" onclick="toggleLayer(this)">
+          <div class="layer-num">3</div>
+          <div class="layer-name">Network</div>
+          <div class="layer-unit">PACKETS</div>
+          <div class="layer-arrow">▼</div>
+        </div>
+        <div class="layer-body">
+          <div class="layer-content">
+            <div class="layer-desc">
+              Responsible for the <strong>addressing of messages</strong>. Determines the path packets must take based
+              on the state of the network — this is <strong>routing</strong>. Every router in the internet operates
+              primarily at this layer.
+            </div>
+            <div class="layer-protocols">
+              <h4>Common Protocols</h4>
+              <div class="proto-tags">
+                <span class="proto-tag">IP</span>
+                <span class="proto-tag">ICMP</span>
+                <span class="proto-tag">CLNP</span>
+                <span class="proto-tag">RIP</span>
+                <span class="proto-tag">OSPF</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="layer-card" data-layer="2">
-      <div class="layer-header" onclick="toggleLayer(this)">
-        <div class="layer-num">2</div>
-        <div class="layer-name">Data Link</div>
-        <div class="layer-unit">FRAMES</div>
-        <div class="layer-arrow">▼</div>
-      </div>
-      <div class="layer-body">
-        <div class="layer-content">
-          <div class="layer-desc">
-            Responsible for the <strong>error-free transfer of bit frames</strong> between two computers through the physical layer. Handles MAC addressing so that devices on the same local network can find each other.
-          </div>
-          <div class="layer-protocols">
-            <h4>Common Protocols</h4>
-            <div class="proto-tags">
-              <span class="proto-tag">Ethernet</span>
-              <span class="proto-tag">Wi-Fi</span>
-              <span class="proto-tag">PPP</span>
-              <span class="proto-tag">HDLC</span>
-              <span class="proto-tag">Token Ring</span>
+      <div class="layer-card" data-layer="2">
+        <div class="layer-header" onclick="toggleLayer(this)">
+          <div class="layer-num">2</div>
+          <div class="layer-name">Data Link</div>
+          <div class="layer-unit">FRAMES</div>
+          <div class="layer-arrow">▼</div>
+        </div>
+        <div class="layer-body">
+          <div class="layer-content">
+            <div class="layer-desc">
+              Responsible for the <strong>error-free transfer of bit frames</strong> between two computers through the
+              physical layer. Handles MAC addressing so that devices on the same local network can find each other.
+            </div>
+            <div class="layer-protocols">
+              <h4>Common Protocols</h4>
+              <div class="proto-tags">
+                <span class="proto-tag">Ethernet</span>
+                <span class="proto-tag">Wi-Fi</span>
+                <span class="proto-tag">PPP</span>
+                <span class="proto-tag">HDLC</span>
+                <span class="proto-tag">Token Ring</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="layer-card" data-layer="1">
-      <div class="layer-header" onclick="toggleLayer(this)">
-        <div class="layer-num">1</div>
-        <div class="layer-name">Physical</div>
-        <div class="layer-unit">BITS</div>
-        <div class="layer-arrow">▼</div>
-      </div>
-      <div class="layer-body">
-        <div class="layer-content">
-          <div class="layer-desc">
-            Transmits and manages the flow of <strong>raw electrical/optical signals</strong> through a physical medium. Defines the electrical, optical, mechanical, and functional interfaces with the cable or other medium. This is the actual wire, fiber, or radio wave.
-          </div>
-          <div class="layer-protocols">
-            <h4>Examples</h4>
-            <div class="proto-tags">
-              <span class="proto-tag">RS232</span>
-              <span class="proto-tag">10BASE-T</span>
-              <span class="proto-tag">X21</span>
-              <span class="proto-tag">USB</span>
-              <span class="proto-tag">Bluetooth</span>
+      <div class="layer-card" data-layer="1">
+        <div class="layer-header" onclick="toggleLayer(this)">
+          <div class="layer-num">1</div>
+          <div class="layer-name">Physical</div>
+          <div class="layer-unit">BITS</div>
+          <div class="layer-arrow">▼</div>
+        </div>
+        <div class="layer-body">
+          <div class="layer-content">
+            <div class="layer-desc">
+              Transmits and manages the flow of <strong>raw electrical/optical signals</strong> through a physical
+              medium. Defines the electrical, optical, mechanical, and functional interfaces with the cable or other
+              medium. This is the actual wire, fiber, or radio wave.
+            </div>
+            <div class="layer-protocols">
+              <h4>Examples</h4>
+              <div class="proto-tags">
+                <span class="proto-tag">RS232</span>
+                <span class="proto-tag">10BASE-T</span>
+                <span class="proto-tag">X21</span>
+                <span class="proto-tag">USB</span>
+                <span class="proto-tag">Bluetooth</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- SERVICES & PROTOCOLS -->
+  <section id="services">
+    <div class="section-label">03 — Services & Protocols</div>
+    <h2 class="section-title reveal">How layers<br>talk to each other</h2>
+    <div class="why-grid reveal">
+      <div class="why-card">
+        <div class="why-icon">🔼</div>
+        <h3>Services Flow Upward</h3>
+        <p>Each layer <strong>provides services to the layer above it</strong> while consuming the services of the layer
+          below. Layer 3 (Network) uses Layer 2 (Data Link) to deliver packets, and offers routing to Layer 4
+          (Transport).</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🔗</div>
+        <h3>Service Interface</h3>
+        <p>A <strong>service interface</strong> is the set of primitives (function calls) that allow the layer above to
+          access the current layer's services. It's like an API between layers.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🤝</div>
+        <h3>Protocols: Peer-to-Peer</h3>
+        <p>A communication protocol is defined <strong>between two layers of the same level</strong> — the Transport
+          layer on Machine A communicates with the Transport layer on Machine B using the same protocol (e.g., TCP).</p>
+      </div>
+      <div class="why-card accent">
+        <div class="why-icon">📋</div>
+        <h3>Rules of Communication</h3>
+        <p>For two computers to communicate, they must adopt <strong>the same rules</strong>. These rules constitute a
+          protocol. Without agreed-upon protocols, data exchange would be impossible.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ENCAPSULATION -->
+  <section id="encapsulation">
+    <div class="section-label">04 — Encapsulation</div>
+    <h2 class="section-title reveal">Data wraps itself<br>as it travels down</h2>
+
+    <div class="encap-anim reveal" id="encapAnim">
+      <p style="font-family:'Space Mono',monospace;font-size:0.75rem;color:var(--muted);margin-bottom:2rem;">Each layer
+        adds its own <strong style="color:var(--text)">header</strong> (H) to the data as it travels down the sender's
+        stack.</p>
+
+      <div class="encap-row" id="er7">
+        <div class="encap-label">Application</div>
+        <div class="encap-data">Data</div>
+      </div>
+      <div class="encap-row" id="er6">
+        <div class="encap-label">Presentation</div>
+        <div class="encap-header"
+          style="background:rgba(69,183,209,0.2);color:var(--layer6);border:1px solid var(--layer6);">H7</div>
+        <div class="encap-data">Data</div>
+      </div>
+      <div class="encap-row" id="er5">
+        <div class="encap-label">Session</div>
+        <div class="encap-header"
+          style="background:rgba(78,205,196,0.2);color:var(--layer5);border:1px solid var(--layer5);">H6</div>
+        <div class="encap-header"
+          style="background:rgba(69,183,209,0.2);color:var(--layer6);border:1px solid var(--layer6);">H7</div>
+        <div class="encap-data">Data</div>
+      </div>
+      <div class="encap-row" id="er4">
+        <div class="encap-label">Transport</div>
+        <div class="encap-header"
+          style="background:rgba(107,203,119,0.2);color:var(--layer4);border:1px solid var(--layer4);">H5</div>
+        <div class="encap-header"
+          style="background:rgba(78,205,196,0.2);color:var(--layer5);border:1px solid var(--layer5);">H6</div>
+        <div class="encap-header"
+          style="background:rgba(69,183,209,0.2);color:var(--layer6);border:1px solid var(--layer6);">H7</div>
+        <div class="encap-data">Data</div>
+      </div>
+      <div class="encap-row" id="er3">
+        <div class="encap-label">Network</div>
+        <div class="encap-header"
+          style="background:rgba(255,217,61,0.2);color:var(--layer3);border:1px solid var(--layer3);">H4</div>
+        <div class="encap-header"
+          style="background:rgba(107,203,119,0.2);color:var(--layer4);border:1px solid var(--layer4);">H5</div>
+        <div class="encap-header"
+          style="background:rgba(78,205,196,0.2);color:var(--layer5);border:1px solid var(--layer5);">H6</div>
+        <div class="encap-header"
+          style="background:rgba(69,183,209,0.2);color:var(--layer6);border:1px solid var(--layer6);">H7</div>
+        <div class="encap-data">Data</div>
+      </div>
+      <div class="encap-row" id="er2">
+        <div class="encap-label">Data Link</div>
+        <div class="encap-header"
+          style="background:rgba(255,159,67,0.2);color:var(--layer2);border:1px solid var(--layer2);">H3</div>
+        <div class="encap-header"
+          style="background:rgba(255,217,61,0.2);color:var(--layer3);border:1px solid var(--layer3);">H4</div>
+        <div class="encap-header"
+          style="background:rgba(107,203,119,0.2);color:var(--layer4);border:1px solid var(--layer4);">H5</div>
+        <div class="encap-header"
+          style="background:rgba(78,205,196,0.2);color:var(--layer5);border:1px solid var(--layer5);">H6</div>
+        <div class="encap-header"
+          style="background:rgba(69,183,209,0.2);color:var(--layer6);border:1px solid var(--layer6);">H7</div>
+        <div class="encap-data">Data</div>
+      </div>
+      <div class="encap-row" id="er1">
+        <div class="encap-label">Physical</div>
+        <div class="encap-header"
+          style="background:rgba(255,107,107,0.2);color:var(--layer1);border:1px solid var(--layer1);">H2</div>
+        <div class="encap-header"
+          style="background:rgba(255,159,67,0.2);color:var(--layer2);border:1px solid var(--layer2);">H3</div>
+        <div class="encap-header"
+          style="background:rgba(255,217,61,0.2);color:var(--layer3);border:1px solid var(--layer3);">H4</div>
+        <div class="encap-header"
+          style="background:rgba(107,203,119,0.2);color:var(--layer4);border:1px solid var(--layer4);">H5</div>
+        <div class="encap-header"
+          style="background:rgba(78,205,196,0.2);color:var(--layer5);border:1px solid var(--layer5);">H6</div>
+        <div class="encap-header"
+          style="background:rgba(69,183,209,0.2);color:var(--layer6);border:1px solid var(--layer6);">H7</div>
+        <div class="encap-data">Data</div>
+      </div>
+
+      <button class="encap-btn" onclick="animateEncap()">▶ Replay Animation</button>
     </div>
 
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- SERVICES & PROTOCOLS -->
-<section id="services">
-  <div class="section-label">03 — Services & Protocols</div>
-  <h2 class="section-title reveal">How layers<br>talk to each other</h2>
-  <div class="why-grid reveal">
-    <div class="why-card">
-      <div class="why-icon">🔼</div>
-      <h3>Services Flow Upward</h3>
-      <p>Each layer <strong>provides services to the layer above it</strong> while consuming the services of the layer below. Layer 3 (Network) uses Layer 2 (Data Link) to deliver packets, and offers routing to Layer 4 (Transport).</p>
+    <div class="why-grid reveal">
+      <div class="why-card">
+        <div class="why-icon">📎</div>
+        <h3>Encapsulation (Sending)</h3>
+        <p>As data travels <strong>down</strong> the sender's layers, each layer wraps it with its own header —
+          containing control info like destination address and message number. The data gets progressively bigger.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">📂</div>
+        <h3>Decapsulation (Receiving)</h3>
+        <p>At the receiver, data travels <strong>up</strong> the layers. Each layer strips off its corresponding header
+          and forwards the rest upward. By the time it reaches Layer 7, only the original data remains.</p>
+      </div>
     </div>
-    <div class="why-card">
-      <div class="why-icon">🔗</div>
-      <h3>Service Interface</h3>
-      <p>A <strong>service interface</strong> is the set of primitives (function calls) that allow the layer above to access the current layer's services. It's like an API between layers.</p>
-    </div>
-    <div class="why-card">
-      <div class="why-icon">🤝</div>
-      <h3>Protocols: Peer-to-Peer</h3>
-      <p>A communication protocol is defined <strong>between two layers of the same level</strong> — the Transport layer on Machine A communicates with the Transport layer on Machine B using the same protocol (e.g., TCP).</p>
-    </div>
-    <div class="why-card accent">
-      <div class="why-icon">📋</div>
-      <h3>Rules of Communication</h3>
-      <p>For two computers to communicate, they must adopt <strong>the same rules</strong>. These rules constitute a protocol. Without agreed-upon protocols, data exchange would be impossible.</p>
-    </div>
-  </div>
-</section>
+  </section>
 
-<div class="divider"></div>
+  <div class="divider"></div>
 
-<!-- ENCAPSULATION -->
-<section id="encapsulation">
-  <div class="section-label">04 — Encapsulation</div>
-  <h2 class="section-title reveal">Data wraps itself<br>as it travels down</h2>
+  <!-- QUIZ -->
+  <section id="quiz">
+    <div class="section-label">05 — Knowledge Check</div>
+    <h2 class="section-title reveal">Test yourself</h2>
 
-  <div class="encap-anim reveal" id="encapAnim">
-    <p style="font-family:'Space Mono',monospace;font-size:0.75rem;color:var(--muted);margin-bottom:2rem;">Each layer adds its own <strong style="color:var(--text)">header</strong> (H) to the data as it travels down the sender's stack.</p>
+    <div id="quizContainer" class="reveal"></div>
+  </section>
 
-    <div class="encap-row" id="er7">
-      <div class="encap-label">Application</div>
-      <div class="encap-data">Data</div>
-    </div>
-    <div class="encap-row" id="er6">
-      <div class="encap-label">Presentation</div>
-      <div class="encap-header" style="background:rgba(69,183,209,0.2);color:var(--layer6);border:1px solid var(--layer6);">H7</div>
-      <div class="encap-data">Data</div>
-    </div>
-    <div class="encap-row" id="er5">
-      <div class="encap-label">Session</div>
-      <div class="encap-header" style="background:rgba(78,205,196,0.2);color:var(--layer5);border:1px solid var(--layer5);">H6</div>
-      <div class="encap-header" style="background:rgba(69,183,209,0.2);color:var(--layer6);border:1px solid var(--layer6);">H7</div>
-      <div class="encap-data">Data</div>
-    </div>
-    <div class="encap-row" id="er4">
-      <div class="encap-label">Transport</div>
-      <div class="encap-header" style="background:rgba(107,203,119,0.2);color:var(--layer4);border:1px solid var(--layer4);">H5</div>
-      <div class="encap-header" style="background:rgba(78,205,196,0.2);color:var(--layer5);border:1px solid var(--layer5);">H6</div>
-      <div class="encap-header" style="background:rgba(69,183,209,0.2);color:var(--layer6);border:1px solid var(--layer6);">H7</div>
-      <div class="encap-data">Data</div>
-    </div>
-    <div class="encap-row" id="er3">
-      <div class="encap-label">Network</div>
-      <div class="encap-header" style="background:rgba(255,217,61,0.2);color:var(--layer3);border:1px solid var(--layer3);">H4</div>
-      <div class="encap-header" style="background:rgba(107,203,119,0.2);color:var(--layer4);border:1px solid var(--layer4);">H5</div>
-      <div class="encap-header" style="background:rgba(78,205,196,0.2);color:var(--layer5);border:1px solid var(--layer5);">H6</div>
-      <div class="encap-header" style="background:rgba(69,183,209,0.2);color:var(--layer6);border:1px solid var(--layer6);">H7</div>
-      <div class="encap-data">Data</div>
-    </div>
-    <div class="encap-row" id="er2">
-      <div class="encap-label">Data Link</div>
-      <div class="encap-header" style="background:rgba(255,159,67,0.2);color:var(--layer2);border:1px solid var(--layer2);">H3</div>
-      <div class="encap-header" style="background:rgba(255,217,61,0.2);color:var(--layer3);border:1px solid var(--layer3);">H4</div>
-      <div class="encap-header" style="background:rgba(107,203,119,0.2);color:var(--layer4);border:1px solid var(--layer4);">H5</div>
-      <div class="encap-header" style="background:rgba(78,205,196,0.2);color:var(--layer5);border:1px solid var(--layer5);">H6</div>
-      <div class="encap-header" style="background:rgba(69,183,209,0.2);color:var(--layer6);border:1px solid var(--layer6);">H7</div>
-      <div class="encap-data">Data</div>
-    </div>
-    <div class="encap-row" id="er1">
-      <div class="encap-label">Physical</div>
-      <div class="encap-header" style="background:rgba(255,107,107,0.2);color:var(--layer1);border:1px solid var(--layer1);">H2</div>
-      <div class="encap-header" style="background:rgba(255,159,67,0.2);color:var(--layer2);border:1px solid var(--layer2);">H3</div>
-      <div class="encap-header" style="background:rgba(255,217,61,0.2);color:var(--layer3);border:1px solid var(--layer3);">H4</div>
-      <div class="encap-header" style="background:rgba(107,203,119,0.2);color:var(--layer4);border:1px solid var(--layer4);">H5</div>
-      <div class="encap-header" style="background:rgba(78,205,196,0.2);color:var(--layer5);border:1px solid var(--layer5);">H6</div>
-      <div class="encap-header" style="background:rgba(69,183,209,0.2);color:var(--layer6);border:1px solid var(--layer6);">H7</div>
-      <div class="encap-data">Data</div>
-    </div>
+  <footer>
+    <p>OSI Reference Model · Chapter 2 · Communication Networks<br>
+      NTIC Faculty, University of Constantine 2 — Prof. Nabil Belala · February 2025</p>
+  </footer>
 
-    <button class="encap-btn" onclick="animateEncap()">▶ Replay Animation</button>
-  </div>
+  <script>
+    // Cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    function animCursor() {
+      rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+      cursor.style.transform = `translate(${mx - 6}px, ${my - 6}px)`;
+      ring.style.transform = `translate(${rx - 18}px, ${ry - 18}px)`;
+      requestAnimationFrame(animCursor);
+    }
+    animCursor();
 
-  <div class="why-grid reveal">
-    <div class="why-card">
-      <div class="why-icon">📎</div>
-      <h3>Encapsulation (Sending)</h3>
-      <p>As data travels <strong>down</strong> the sender's layers, each layer wraps it with its own header — containing control info like destination address and message number. The data gets progressively bigger.</p>
-    </div>
-    <div class="why-card">
-      <div class="why-icon">📂</div>
-      <h3>Decapsulation (Receiving)</h3>
-      <p>At the receiver, data travels <strong>up</strong> the layers. Each layer strips off its corresponding header and forwards the rest upward. By the time it reaches Layer 7, only the original data remains.</p>
-    </div>
-  </div>
-</section>
+    // Progress bar
+    window.addEventListener('scroll', () => {
+      const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+      document.getElementById('progressBar').style.width = pct + '%';
+    });
 
-<div class="divider"></div>
+    // Layer toggle
+    function toggleLayer(header) {
+      const card = header.parentElement;
+      card.classList.toggle('open');
+    }
 
-<!-- QUIZ -->
-<section id="quiz">
-  <div class="section-label">05 — Knowledge Check</div>
-  <h2 class="section-title reveal">Test yourself</h2>
+    // Scroll reveal
+    const revealEls = document.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); } });
+    }, { threshold: 0.1 });
+    revealEls.forEach(el => obs.observe(el));
 
-  <div id="quizContainer" class="reveal"></div>
-</section>
+    // Encapsulation animation
+    function animateEncap() {
+      const rows = ['er7', 'er6', 'er5', 'er4', 'er3', 'er2', 'er1'].map(id => document.getElementById(id));
+      rows.forEach(r => r.classList.remove('visible'));
+      rows.forEach((r, i) => setTimeout(() => r.classList.add('visible'), i * 350 + 200));
+    }
 
-<footer>
-  <p>OSI Reference Model · Chapter 2 · Communication Networks<br>
-  NTIC Faculty, University of Constantine 2 — Prof. Nabil Belala · February 2025</p>
-</footer>
+    // Trigger encap on scroll into view
+    const encapObs = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) { setTimeout(animateEncap, 400); encapObs.disconnect(); }
+    }, { threshold: 0.3 });
+    encapObs.observe(document.getElementById('encapAnim'));
 
-<script>
-// Cursor
-const cursor = document.getElementById('cursor');
-const ring = document.getElementById('cursorRing');
-let mx = 0, my = 0, rx = 0, ry = 0;
-document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-function animCursor() {
-  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
-  cursor.style.transform = `translate(${mx-6}px, ${my-6}px)`;
-  ring.style.transform = `translate(${rx-18}px, ${ry-18}px)`;
-  requestAnimationFrame(animCursor);
-}
-animCursor();
+    // Quiz
+    const questions = [
+      {
+        q: "Which OSI layer is responsible for routing packets across the network?",
+        options: ["Transport (Layer 4)", "Network (Layer 3)", "Data Link (Layer 2)", "Session (Layer 5)"],
+        answer: 1,
+        explanation: "The Network layer (Layer 3) handles addressing and routing — it determines the path packets must take based on the state of the network. IP operates at this layer."
+      },
+      {
+        q: "What is encapsulation in the context of the OSI model?",
+        options: [
+          "Compressing data to save bandwidth",
+          "Encrypting data for secure transmission",
+          "Wrapping data with control headers as it travels down the layers",
+          "Splitting data into equal-size packets"
+        ],
+        answer: 2,
+        explanation: "Encapsulation is the operation of enveloping useful data with control information (headers) as it passes down through each layer. Each layer adds its own header containing layer-specific info."
+      },
+      {
+        q: "Which layer is responsible for ensuring error-free, ordered, end-to-end delivery?",
+        options: ["Network", "Data Link", "Transport", "Presentation"],
+        answer: 2,
+        explanation: "The Transport layer (Layer 4) ensures packets arrive without errors, in the correct order, and without loss or duplication. TCP is the classic example of a Transport layer protocol."
+      },
+      {
+        q: "What unit of data does the Data Link layer work with?",
+        options: ["Packets", "Bits", "Frames", "Segments"],
+        answer: 2,
+        explanation: "The Data Link layer works with Frames. Each layer has its own data unit: Physical=Bits, Data Link=Frames, Network=Packets, Transport=Segments, and Layers 5-7=Data."
+      },
+      {
+        q: "A communication protocol is defined between...",
+        options: [
+          "Adjacent layers on the same machine",
+          "Two layers of the same level on different machines",
+          "The Physical and Application layers",
+          "The user and the Application layer"
+        ],
+        answer: 1,
+        explanation: "A protocol is defined between two layers of the same level — a local Layer N communicates with a remote Layer N using the same protocol. This is called peer-to-peer communication."
+      },
+      {
+        q: "Which organization defined the OSI reference model?",
+        options: ["IEEE", "IETF", "ISO", "ITU"],
+        answer: 2,
+        explanation: "ISO (International Standards Organization) defined the OSI (Open Systems Interconnection) reference model to solve the problem of heterogeneous devices communicating over a network."
+      },
+      {
+        q: "The Presentation layer acts as a translator. What does it translate?",
+        options: [
+          "Human language to machine code",
+          "Data formats between computers on the network",
+          "IP addresses to MAC addresses",
+          "Electrical signals to digital data"
+        ],
+        answer: 1,
+        explanation: "The Presentation layer determines the intermediate format used for exchanging data between computers. It handles encoding, encryption, and compression — acting as a translator for the Application layer."
+      }
+    ];
 
-// Progress bar
-window.addEventListener('scroll', () => {
-  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
-  document.getElementById('progressBar').style.width = pct + '%';
-});
+    let current = 0, score = 0, answered = false;
 
-// Layer toggle
-function toggleLayer(header) {
-  const card = header.parentElement;
-  card.classList.toggle('open');
-}
-
-// Scroll reveal
-const revealEls = document.querySelectorAll('.reveal');
-const obs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); } });
-}, { threshold: 0.1 });
-revealEls.forEach(el => obs.observe(el));
-
-// Encapsulation animation
-function animateEncap() {
-  const rows = ['er7','er6','er5','er4','er3','er2','er1'].map(id => document.getElementById(id));
-  rows.forEach(r => r.classList.remove('visible'));
-  rows.forEach((r, i) => setTimeout(() => r.classList.add('visible'), i * 350 + 200));
-}
-
-// Trigger encap on scroll into view
-const encapObs = new IntersectionObserver(entries => {
-  if (entries[0].isIntersecting) { setTimeout(animateEncap, 400); encapObs.disconnect(); }
-}, { threshold: 0.3 });
-encapObs.observe(document.getElementById('encapAnim'));
-
-// Quiz
-const questions = [
-  {
-    q: "Which OSI layer is responsible for routing packets across the network?",
-    options: ["Transport (Layer 4)", "Network (Layer 3)", "Data Link (Layer 2)", "Session (Layer 5)"],
-    answer: 1,
-    explanation: "The Network layer (Layer 3) handles addressing and routing — it determines the path packets must take based on the state of the network. IP operates at this layer."
-  },
-  {
-    q: "What is encapsulation in the context of the OSI model?",
-    options: [
-      "Compressing data to save bandwidth",
-      "Encrypting data for secure transmission",
-      "Wrapping data with control headers as it travels down the layers",
-      "Splitting data into equal-size packets"
-    ],
-    answer: 2,
-    explanation: "Encapsulation is the operation of enveloping useful data with control information (headers) as it passes down through each layer. Each layer adds its own header containing layer-specific info."
-  },
-  {
-    q: "Which layer is responsible for ensuring error-free, ordered, end-to-end delivery?",
-    options: ["Network", "Data Link", "Transport", "Presentation"],
-    answer: 2,
-    explanation: "The Transport layer (Layer 4) ensures packets arrive without errors, in the correct order, and without loss or duplication. TCP is the classic example of a Transport layer protocol."
-  },
-  {
-    q: "What unit of data does the Data Link layer work with?",
-    options: ["Packets", "Bits", "Frames", "Segments"],
-    answer: 2,
-    explanation: "The Data Link layer works with Frames. Each layer has its own data unit: Physical=Bits, Data Link=Frames, Network=Packets, Transport=Segments, and Layers 5-7=Data."
-  },
-  {
-    q: "A communication protocol is defined between...",
-    options: [
-      "Adjacent layers on the same machine",
-      "Two layers of the same level on different machines",
-      "The Physical and Application layers",
-      "The user and the Application layer"
-    ],
-    answer: 1,
-    explanation: "A protocol is defined between two layers of the same level — a local Layer N communicates with a remote Layer N using the same protocol. This is called peer-to-peer communication."
-  },
-  {
-    q: "Which organization defined the OSI reference model?",
-    options: ["IEEE", "IETF", "ISO", "ITU"],
-    answer: 2,
-    explanation: "ISO (International Standards Organization) defined the OSI (Open Systems Interconnection) reference model to solve the problem of heterogeneous devices communicating over a network."
-  },
-  {
-    q: "The Presentation layer acts as a translator. What does it translate?",
-    options: [
-      "Human language to machine code",
-      "Data formats between computers on the network",
-      "IP addresses to MAC addresses",
-      "Electrical signals to digital data"
-    ],
-    answer: 1,
-    explanation: "The Presentation layer determines the intermediate format used for exchanging data between computers. It handles encoding, encryption, and compression — acting as a translator for the Application layer."
-  }
-];
-
-let current = 0, score = 0, answered = false;
-
-function renderQuiz() {
-  const q = questions[current];
-  const html = `
+    function renderQuiz() {
+      const q = questions[current];
+      const html = `
     <div class="quiz-card">
       <div class="quiz-q">
-        <span>Question ${current+1} of ${questions.length}</span>
+        <span>Question ${current + 1} of ${questions.length}</span>
         ${q.q}
       </div>
       <div class="quiz-options">
@@ -1131,42 +1514,42 @@ function renderQuiz() {
       </div>
     </div>
   `;
-  document.getElementById('quizContainer').innerHTML = html;
-  answered = false;
-}
+      document.getElementById('quizContainer').innerHTML = html;
+      answered = false;
+    }
 
-function answer(idx) {
-  if (answered) return;
-  answered = true;
-  const q = questions[current];
-  const opts = document.querySelectorAll('.quiz-opt');
-  const fb = document.getElementById('qfb');
-  opts.forEach((o, i) => {
-    if (i === q.answer) o.classList.add('correct');
-    else if (i === idx) o.classList.add('wrong');
-    o.onclick = null;
-  });
-  if (idx === q.answer) {
-    score++;
-    fb.className = 'quiz-feedback show good';
-    fb.innerHTML = '✓ Correct! ' + q.explanation;
-  } else {
-    fb.className = 'quiz-feedback show bad';
-    fb.innerHTML = '✗ Not quite. ' + q.explanation;
-  }
-  document.getElementById('nextBtn').style.display = 'inline-block';
-  document.querySelector('.quiz-score').textContent = `Score: ${score}/${current+1}`;
-}
+    function answer(idx) {
+      if (answered) return;
+      answered = true;
+      const q = questions[current];
+      const opts = document.querySelectorAll('.quiz-opt');
+      const fb = document.getElementById('qfb');
+      opts.forEach((o, i) => {
+        if (i === q.answer) o.classList.add('correct');
+        else if (i === idx) o.classList.add('wrong');
+        o.onclick = null;
+      });
+      if (idx === q.answer) {
+        score++;
+        fb.className = 'quiz-feedback show good';
+        fb.innerHTML = '✓ Correct! ' + q.explanation;
+      } else {
+        fb.className = 'quiz-feedback show bad';
+        fb.innerHTML = '✗ Not quite. ' + q.explanation;
+      }
+      document.getElementById('nextBtn').style.display = 'inline-block';
+      document.querySelector('.quiz-score').textContent = `Score: ${score}/${current + 1}`;
+    }
 
-function nextQ() {
-  current++;
-  renderQuiz();
-}
+    function nextQ() {
+      current++;
+      renderQuiz();
+    }
 
-function showResult() {
-  const pct = Math.round(score/questions.length*100);
-  let grade = pct === 100 ? '🏆 Perfect!' : pct >= 70 ? '✅ Well done!' : '📚 Keep studying!';
-  document.getElementById('quizContainer').innerHTML = `
+    function showResult() {
+      const pct = Math.round(score / questions.length * 100);
+      let grade = pct === 100 ? '🏆 Perfect!' : pct >= 70 ? '✅ Well done!' : '📚 Keep studying!';
+      document.getElementById('quizContainer').innerHTML = `
     <div class="quiz-card" style="text-align:center">
       <div style="font-size:4rem;margin-bottom:1rem">${grade.split(' ')[0]}</div>
       <h2 style="font-size:2rem;margin-bottom:0.5rem">${score} / ${questions.length}</h2>
@@ -1174,14 +1557,15 @@ function showResult() {
       <button class="btn btn-primary" onclick="restartQuiz()">Try Again</button>
     </div>
   `;
-}
+    }
 
-function restartQuiz() {
-  current = 0; score = 0; answered = false;
-  renderQuiz();
-}
+    function restartQuiz() {
+      current = 0; score = 0; answered = false;
+      renderQuiz();
+    }
 
-renderQuiz();
-</script>
+    renderQuiz();
+  </script>
 </body>
+
 </html>
