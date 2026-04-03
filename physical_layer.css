@@ -1,3 +1,11 @@
+:root {
+  --c-analog: #ff6b6b;
+  --c-digital: #6bcb77;
+  --c-media: #ff9f43;
+  --c-devices: #ffd93d;
+  --c-rates: #a78bfa;
+}
+
 /* HERO */
 .hero {
   position: relative; min-height: 100vh;

@@ -1,3 +1,13 @@
+:root {
+  --c-ip: #45b7d1;
+  --c-route: #6bcb77;
+  --c-addr: #ffd93d;
+  --c-arp: #ff9f43;
+  --c-hw: #ff6b6b;
+  --c-sub: #a78bfa;
+  --c-danger: #ff6b6b;
+}
+
 /* HERO */
 .hero {
   position: relative; min-height: 100vh;
