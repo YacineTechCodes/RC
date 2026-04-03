@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Link Layer — Interactive Learning</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #12121a;
+      --bg3: #1a1a26;
+      --border: #2a2a3d;
+      --accent: #ff9f43;
+      --accent2: #ff6a9b;
+      --accent3: #6affcc;
+      --text: #e8e8f0;
+      --muted: #7070a0;
+      --layer2: #ff9f43;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    .cursor { width: 12px; height: 12px; background: var(--accent); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; transition: transform 0.1s; mix-blend-mode: screen; }
+    .cursor-ring { width: 36px; height: 36px; border: 1px solid var(--accent); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9998; transition: transform 0.15s; mix-blend-mode: screen; opacity: 0.5; }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 159, 67, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 159, 67, 0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1.2rem 2.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em; }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--muted); text-decoration: none; letter-spacing: 0.08em; transition: color 0.2s; cursor: none; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+
+    .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--accent); z-index: 200; transition: width 0.1s; box-shadow: 0 0 10px var(--accent); }
+
+    /* HERO */
+    .hero {
+      position: relative; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 2rem; overflow: hidden; z-index: 1;
+    }
+    .hero-glow {
+      position: absolute; width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(255, 159, 67, 0.12) 0%, transparent 70%);
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      animation: pulse 4s ease-in-out infinite; pointer-events: none;
+    }
+    @keyframes pulse { 0%,100% { transform: translate(-50%,-50%) scale(1); opacity:0.8; } 50% { transform: translate(-50%,-50%) scale(1.2); opacity:1; } }
+
+    .hero-tag {
+      font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 0.3em;
+      color: var(--accent); text-transform: uppercase;
+      border: 1px solid var(--accent); padding: 0.35rem 1rem; border-radius: 2px;
+      margin-bottom: 2rem; animation: fadeUp 0.8s ease forwards; opacity: 0;
+    }
+    .hero h1 {
+      font-size: clamp(3rem, 10vw, 7rem); font-weight: 800; line-height: 0.9;
+      letter-spacing: -0.03em; margin-bottom: 1.5rem;
+      animation: fadeUp 0.8s 0.2s ease forwards; opacity: 0;
+    }
+    .hero h1 span { display: block; background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-sub {
+      font-family: 'Space Mono', monospace; font-size: 0.9rem; color: var(--muted);
+      max-width: 480px; line-height: 1.7; margin-bottom: 3rem;
+      animation: fadeUp 0.8s 0.4s ease forwards; opacity: 0;
+    }
+    .hero-cta {
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+      animation: fadeUp 0.8s 0.6s ease forwards; opacity: 0;
+    }
+    .btn { font-family: 'Space Mono', monospace; font-size: 0.8rem; letter-spacing: 0.1em; padding: 0.8rem 2rem; border-radius: 2px; text-decoration: none; transition: all 0.2s; display: inline-block; cursor: none; border: none; }
+    .btn-primary { background: var(--accent); color: #000; border: 1px solid var(--accent); box-shadow: 0 4px 15px rgba(255,159,67,0.2); font-weight: 700; }
+    .btn-primary:hover { background: transparent; color: var(--accent); box-shadow: 0 0 20px rgba(255,159,67,0.4); }
+    .btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 20px rgba(255,159,67,0.15); }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+
+    /* Animated frame bits */
+    .hero-frame {
+      position: absolute; left: -80px; top: 50%; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 8px; opacity: 0;
+      animation: fadeIn 1s 1s ease forwards;
+    }
+    @keyframes fadeIn { to { opacity: 0.35; } }
+    .frame-bit {
+      font-family: 'Space Mono', monospace; font-size: 0.6rem; color: var(--accent);
+      animation: blink 2s ease-in-out infinite;
+    }
+    .frame-bit:nth-child(2) { animation-delay: 0.3s; }
+    .frame-bit:nth-child(3) { animation-delay: 0.6s; }
+    .frame-bit:nth-child(4) { animation-delay: 0.9s; color: var(--accent2); }
+    .frame-bit:nth-child(5) { animation-delay: 1.2s; }
+    .frame-bit:nth-child(6) { animation-delay: 1.5s; color: var(--accent3); }
+    @keyframes blink { 0%,100%{opacity:0.4;} 50%{opacity:1;} }
+
+    /* SECTIONS */
+    section { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 6rem 2rem; }
+    .section-label { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.4em; color: var(--accent); text-transform: uppercase; margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem; }
+    .section-label::after { content: ''; flex: 1; max-width: 60px; height: 1px; background: var(--accent); }
+    .section-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 3rem; line-height: 1.1; }
+
+    .divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); position: relative; z-index: 1; }
+
+    /* CARDS GRID */
+    .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .card {
+      background: var(--bg2); border: 1px solid var(--border); padding: 2rem; border-radius: 8px;
+      transition: all 0.3s ease; cursor: none;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 30px -10px rgba(255,159,67,0.15); }
+    .card.accent-card { border-color: rgba(255,159,67,0.3); background: rgba(255,159,67,0.04); }
+    .card-icon { font-size: 2rem; margin-bottom: 1rem; }
+    .card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .card p { font-family: 'Space Mono', monospace; font-size: 0.78rem; color: var(--muted); line-height: 1.7; }
+    .card p strong { color: var(--text); }
+
+    /* ACCORDION */
+    .accordion { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .acc-item { border-bottom: 1px solid var(--border); }
+    .acc-item:last-child { border-bottom: none; }
+    .acc-header {
+      display: flex; align-items: center; gap: 1.5rem; padding: 1.3rem 2rem;
+      cursor: none; user-select: none; transition: background 0.25s;
+    }
+    .acc-header:hover { background: rgba(255,159,67,0.04); }
+    .acc-item.open .acc-header { background: rgba(255,159,67,0.06); }
+    .acc-num {
+      font-family: 'Space Mono', monospace; font-size: 0.75rem; font-weight: 700;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent); color: #000;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .acc-name { font-size: 1rem; font-weight: 700; flex: 1; }
+    .acc-tag { font-family: 'Space Mono', monospace; font-size: 0.62rem; color: var(--muted); letter-spacing: 0.1em; padding: 0.2rem 0.6rem; border: 1px solid var(--border); border-radius: 2px; margin-right: 1rem; }
+    .acc-arrow { font-size: 0.8rem; transition: transform 0.3s; color: var(--muted); }
+    .acc-item.open .acc-arrow { transform: rotate(180deg); }
+    .acc-body { max-height: 0; overflow: hidden; transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1); }
+    .acc-item.open .acc-body { max-height: 600px; }
+    .acc-content {
+      padding: 1.5rem 2rem 2rem; border-top: 1px solid var(--border);
+      display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+      background: rgba(255,255,255,0.01);
+    }
+    .acc-desc { font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--muted); line-height: 1.8; }
+    .acc-desc strong { color: var(--text); }
+    .acc-examples h4 { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.75rem; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .tag { font-family: 'Space Mono', monospace; font-size: 0.68rem; padding: 0.2rem 0.7rem; border-radius: 2px; border: 1px solid rgba(255,159,67,0.4); color: var(--accent); }
+
+    /* MAC DEMO */
+    .mac-demo { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1.5rem; }
+    .mac-demo-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; }
+    .mac-demo-header h3 { font-size: 0.85rem; font-weight: 700; }
+    .mac-demo-body { padding: 2rem; }
+    .mac-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+    .mac-tab {
+      font-family: 'Space Mono', monospace; font-size: 0.72rem;
+      padding: 0.7rem 1.5rem; cursor: none; color: var(--muted);
+      border-bottom: 2px solid transparent; transition: all 0.2s;
+      background: none; border-top: none; border-left: none; border-right: none;
+    }
+    .mac-tab:hover { color: var(--text); }
+    .mac-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .mac-panel { display: none; padding: 2rem 0 0; }
+    .mac-panel.active { display: block; }
+
+    /* Medium visualization */
+    .medium-viz {
+      display: flex; align-items: center; gap: 0; margin: 1.5rem 0;
+      font-family: 'Space Mono', monospace; font-size: 0.72rem;
+    }
+    .station {
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 6px;
+      padding: 0.8rem 1.2rem; text-align: center; flex-shrink: 0;
+    }
+    .station .s-icon { font-size: 1.5rem; display: block; margin-bottom: 0.3rem; }
+    .station .s-name { color: var(--muted); font-size: 0.65rem; }
+    .medium-line { flex: 1; height: 3px; background: var(--border); position: relative; overflow: hidden; }
+    .medium-line.active { background: rgba(255,159,67,0.3); }
+    .medium-line .signal {
+      position: absolute; top: -2px; width: 8px; height: 7px; border-radius: 50%;
+      background: var(--accent); animation: travel 2s linear infinite; opacity: 0;
+    }
+    .medium-line.active .signal { opacity: 1; }
+    @keyframes travel { from { left: -10px; } to { left: 100%; } }
+    .medium-line .signal2 { animation-delay: 1s; }
+    .collision-mark {
+      position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+      color: var(--accent2); font-size: 1rem; display: none;
+      animation: flash 0.5s ease-in-out infinite;
+    }
+    .medium-line.collision .collision-mark { display: block; }
+    @keyframes flash { 0%,100%{opacity:1;} 50%{opacity:0;} }
+    .mac-desc { font-family: 'Space Mono', monospace; font-size: 0.78rem; color: var(--muted); line-height: 1.7; margin-bottom: 1rem; }
+    .mac-desc strong { color: var(--text); }
+
+    /* CRC DEMO */
+    .crc-demo { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin-bottom: 1.5rem; transition: all 0.3s ease; }
+    .crc-demo:hover { border-color: var(--accent); }
+    .crc-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .crc-label { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--muted); width: 100px; flex-shrink: 0; text-align: right; }
+    .crc-input {
+      font-family: 'Space Mono', monospace; font-size: 0.8rem;
+      background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+      padding: 0.5rem 0.8rem; border-radius: 3px; width: 220px;
+      outline: none; transition: border-color 0.2s;
+    }
+    .crc-input:focus { border-color: var(--accent); }
+    .crc-value {
+      font-family: 'Space Mono', monospace; font-size: 0.8rem;
+      background: rgba(255,159,67,0.1); border: 1px solid rgba(255,159,67,0.3);
+      color: var(--accent); padding: 0.5rem 0.8rem; border-radius: 3px;
+      min-width: 100px; text-align: center;
+    }
+    .crc-result {
+      font-family: 'Space Mono', monospace; font-size: 0.8rem;
+      padding: 0.8rem 1.2rem; border-radius: 3px; margin-top: 0.5rem;
+    }
+    .crc-result.ok { background: rgba(106,255,204,0.1); color: var(--accent3); border: 1px solid rgba(106,255,204,0.2); }
+    .crc-result.err { background: rgba(255,106,155,0.1); color: var(--accent2); border: 1px solid rgba(255,106,155,0.2); }
+
+    /* FRAME STRUCTURE */
+    .frame-viz { margin: 2rem 0; }
+    .frame-struct {
+      display: flex; align-items: stretch; border: 1px solid var(--border);
+      border-radius: 6px; overflow: hidden; font-family: 'Space Mono', monospace;
+      font-size: 0.68rem;
+    }
+    .frame-field {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 1rem 0.5rem; text-align: center; border-right: 1px solid var(--border);
+      transition: all 0.3s; cursor: none; position: relative;
+    }
+    .frame-field:last-child { border-right: none; }
+    .frame-field:hover { filter: brightness(1.2); }
+    .frame-field .f-name { font-weight: 700; font-size: 0.7rem; margin-bottom: 0.3rem; }
+    .frame-field .f-size { color: rgba(255,255,255,0.5); font-size: 0.6rem; }
+    .frame-flag { background: rgba(255,159,67,0.15); color: var(--accent); flex: 1; }
+    .frame-addr { background: rgba(106,255,204,0.1); color: var(--accent3); flex: 2; }
+    .frame-ctrl { background: rgba(255,106,155,0.1); color: var(--accent2); flex: 1.5; }
+    .frame-data { background: rgba(124,106,255,0.1); color: #a78bfa; flex: 4; }
+    .frame-fcs  { background: rgba(255,217,61,0.1); color: #ffd93d; flex: 2; }
+
+    .field-tooltip {
+      position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 4px;
+      padding: 0.5rem 0.8rem; font-size: 0.65rem; color: var(--text); white-space: nowrap;
+      pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 10;
+    }
+    .frame-field:hover .field-tooltip { opacity: 1; }
+
+    /* HAMMING */
+    .hamming-demo { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; }
+    .hamming-bits { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1.5rem 0; }
+    .h-bit {
+      width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700;
+      border: 1px solid var(--border); position: relative; transition: all 0.3s; cursor: none;
+    }
+    .h-bit.data { background: rgba(124,106,255,0.15); color: #a78bfa; border-color: rgba(124,106,255,0.3); }
+    .h-bit.parity { background: rgba(255,159,67,0.15); color: var(--accent); border-color: rgba(255,159,67,0.3); }
+    .h-bit.error { background: rgba(255,106,155,0.3); color: var(--accent2); border-color: var(--accent2); animation: shake 0.4s ease; }
+    .h-bit.fixed { background: rgba(106,255,204,0.15); color: var(--accent3); border-color: var(--accent3); }
+    .h-bit .pos { position: absolute; top: 2px; left: 4px; font-size: 0.5rem; opacity: 0.5; }
+    @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);} }
+    .hamming-info { font-family: 'Space Mono', monospace; font-size: 0.78rem; color: var(--muted); line-height: 1.7; margin-bottom: 1rem; }
+    .hamming-info strong { color: var(--text); }
+
+    /* QUIZ */
+    .quiz-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 2.5rem; margin-bottom: 1rem; transition: all 0.3s ease; }
+    .quiz-card:hover { border-color: var(--accent); box-shadow: 0 10px 30px -10px rgba(255,159,67,0.1); }
+    .quiz-q { font-size: 1.05rem; font-weight: 700; margin-bottom: 1.5rem; line-height: 1.4; }
+    .quiz-q span { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--accent); letter-spacing: 0.2em; display: block; margin-bottom: 0.5rem; }
+    .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .quiz-opt { font-family: 'Space Mono', monospace; font-size: 0.78rem; padding: 0.9rem 1.2rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; cursor: none; transition: all 0.2s; text-align: left; color: var(--text); }
+    .quiz-opt:hover { border-color: var(--accent); box-shadow: 0 4px 15px rgba(255,159,67,0.15); }
+    .quiz-opt.correct { border-color: var(--accent3); color: var(--accent3); background: rgba(106,255,204,0.07); }
+    .quiz-opt.wrong { border-color: var(--accent2); color: var(--accent2); background: rgba(255,106,155,0.07); }
+    .quiz-feedback { font-family: 'Space Mono', monospace; font-size: 0.78rem; margin-top: 1rem; padding: 0.8rem 1rem; border-radius: 3px; display: none; line-height: 1.6; }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.good { background: rgba(106,255,204,0.1); color: var(--accent3); border: 1px solid rgba(106,255,204,0.2); }
+    .quiz-feedback.bad { background: rgba(255,106,155,0.1); color: var(--accent2); border: 1px solid rgba(255,106,155,0.2); }
+    .quiz-nav { display: flex; gap: 1rem; margin-top: 1.5rem; align-items: center; }
+    .quiz-score { font-family: 'Space Mono', monospace; font-size: 0.78rem; color: var(--muted); margin-left: auto; }
+
+    /* REVEAL */
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+
+    footer { position: relative; z-index: 1; text-align: center; padding: 3rem 2rem; border-top: 1px solid var(--border); }
+    footer p { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); }
+
+    @media (max-width: 700px) {
+      .cards-grid, .quiz-options, .acc-content { grid-template-columns: 1fr; }
+      .hero-frame { display: none; }
+      nav .nav-links { display: none; }
+      .frame-struct { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="progress-bar" id="progressBar"></div>
+
+<nav>
+  <div class="nav-logo">OSI<span>.</span>LEARN</div>
+  <div class="nav-links">
+    <a href="osi_model.html">Overview</a>
+    <a href="physical_layer.html">Layer 1</a>
+    <a href="#" class="active">Layer 2</a>
+    <a href="network_layer.html">Layer 3</a>
+    <span style="color:var(--border)">|</span>
+    <a href="#functions">Functions</a>
+    <a href="#mac">MAC</a>
+    <a href="#errors">Errors</a>
+    <a href="#protocols">Protocols</a>
+    <a href="#quiz">Quiz</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-frame">
+    <div class="frame-bit">01111110</div>
+    <div class="frame-bit">10110100</div>
+    <div class="frame-bit">11001011</div>
+    <div class="frame-bit">FLAG ···</div>
+    <div class="frame-bit">00000000</div>
+    <div class="frame-bit">CRC ····</div>
+  </div>
+  <div class="hero-tag">Layer 2 · OSI Model · Data Communications</div>
+  <h1>Data Link<br><span>Layer</span></h1>
+  <p class="hero-sub">From raw bits to structured frames — the layer that makes neighbor-to-neighbor communication reliable.</p>
+  <div class="hero-cta">
+    <a href="#functions" class="btn btn-primary">Start Learning</a>
+    <a href="#quiz" class="btn btn-secondary">Take the Quiz</a>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FUNCTIONS -->
+<section id="functions">
+  <div class="section-label">01 — Overview</div>
+  <h2 class="section-title reveal">Primary Functions<br>& Services</h2>
+  <div class="cards-grid reveal">
+    <div class="card accent-card">
+      <div class="card-icon">🔗</div>
+      <h3>What Is It?</h3>
+      <p>The <strong>second layer of the OSI model</strong>. Its mission: ensure <strong>error-free delivery of bit frames</strong> between two directly connected (neighboring) stations over a physical link.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <h3>Frame Delimitation</h3>
+      <p>Bits from the physical layer are raw — no structure. Layer 2 organizes them into <strong>frames</strong>, marking clear start/end boundaries so the receiver knows where one frame ends and the next begins.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔄</div>
+      <h3>Flow Control</h3>
+      <p>Manages the <strong>speed of transmission</strong> to prevent a fast sender from overwhelming a slow receiver. Without flow control, the receiver's buffer would overflow and data would be lost.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🛡️</div>
+      <h3>Error Control</h3>
+      <p>Detects — and sometimes corrects — <strong>bit-level errors</strong> introduced during physical transmission. Uses techniques like parity, Hamming codes, and CRC to catch problems before they reach upper layers.</p>
+    </div>
+  </div>
+
+  <div style="margin-top: 2rem;" class="reveal">
+    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem;">Connection Modes</h3>
+    <div class="accordion">
+      <div class="acc-item" id="mode1">
+        <div class="acc-header" onclick="toggleAcc('mode1')">
+          <div class="acc-num">A</div>
+          <div class="acc-name">Connectionless, without Acknowledgment</div>
+          <div class="acc-tag">BEST EFFORT</div>
+          <div class="acc-arrow">▼</div>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="acc-desc">Frames are sent <strong>without establishing a connection first</strong> and without any acknowledgment from the receiver. This is the fastest and simplest mode. <strong>Best suited for reliable links</strong> (like wired Ethernet) or when higher layers handle error recovery. Lost frames are simply not retransmitted at this layer.</div>
+            <div class="acc-examples">
+              <h4>Used When</h4>
+              <div class="tag-row">
+                <span class="tag">Reliable Links</span>
+                <span class="tag">Low Error Rate</span>
+                <span class="tag">Speed Priority</span>
+                <span class="tag">Upper Layer Recovery</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="acc-item" id="mode2">
+        <div class="acc-header" onclick="toggleAcc('mode2')">
+          <div class="acc-num">B</div>
+          <div class="acc-name">Connectionless, with Acknowledgment</div>
+          <div class="acc-tag">ACK REQUIRED</div>
+          <div class="acc-arrow">▼</div>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="acc-desc">No formal connection setup, but <strong>every frame must be acknowledged</strong> before the next one is sent. If no ACK arrives within a timeout, the frame is retransmitted. Used for <strong>unreliable links</strong> like wireless networks where errors are common. Adds reliability without the overhead of connection setup.</div>
+            <div class="acc-examples">
+              <h4>Used When</h4>
+              <div class="tag-row">
+                <span class="tag">Unreliable Links</span>
+                <span class="tag">Wi-Fi (802.11)</span>
+                <span class="tag">ACK per Frame</span>
+                <span class="tag">Retransmission</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="acc-item" id="mode3">
+        <div class="acc-header" onclick="toggleAcc('mode3')">
+          <div class="acc-num">C</div>
+          <div class="acc-name">With Connection, with Acknowledgment</div>
+          <div class="acc-tag">MOST RELIABLE</div>
+          <div class="acc-arrow">▼</div>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="acc-desc">The most reliable mode. Requires a <strong>formal connection establishment phase</strong> before any data is sent. Every frame is numbered and acknowledged. Guarantees frames arrive <strong>in order, without duplicates, and without loss</strong>. Connection is formally released when done. Used when data integrity is critical.</div>
+            <div class="acc-examples">
+              <h4>Phases</h4>
+              <div class="tag-row">
+                <span class="tag">Connection Setup</span>
+                <span class="tag">Data Transfer</span>
+                <span class="tag">Connection Release</span>
+                <span class="tag">Guaranteed Delivery</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- MAC -->
+<section id="mac">
+  <div class="section-label">02 — Medium Access</div>
+  <h2 class="section-title reveal">Who speaks, when,<br>and for how long?</h2>
+  <p style="font-family:'Space Mono',monospace; font-size:0.82rem; color:var(--muted); max-width:640px; line-height:1.8; margin-bottom:3rem;" class="reveal">
+    On a <strong style="color:var(--text)">shared network medium</strong>, multiple stations compete for the right to transmit. Medium Access Control (MAC) defines the rules that prevent chaos. Click each method to see how it works.
+  </p>
+
+  <div class="mac-demo reveal">
+    <div class="mac-tabs">
+      <button class="mac-tab active" onclick="switchMac('csmacd', this)">CSMA/CD</button>
+      <button class="mac-tab" onclick="switchMac('csmaca', this)">CSMA/CA</button>
+      <button class="mac-tab" onclick="switchMac('token', this)">Token Passing</button>
+    </div>
+
+    <!-- CSMA/CD -->
+    <div class="mac-panel active" id="mac-csmacd">
+      <div class="mac-desc"><strong>Carrier Sense Multiple Access / Collision Detection</strong> — Used in wired bus topologies (classic Ethernet). A station listens before transmitting. If the medium is free, it sends. If two stations transmit simultaneously, a <strong>collision</strong> occurs — both detect it, send a jamming signal, and wait a random delay before retrying.</div>
+      <div class="medium-viz" id="csmacd-viz">
+        <div class="station"><span class="s-icon">💻</span><span class="s-name">A</span></div>
+        <div class="medium-line active" id="cd-line1"><div class="signal"></div><div class="signal signal2"></div><div class="collision-mark">💥</div></div>
+        <div class="station"><span class="s-icon">🖥️</span><span class="s-name">B</span></div>
+        <div class="medium-line active" id="cd-line2"><div class="signal"></div><div class="signal signal2"></div></div>
+        <div class="station"><span class="s-icon">💻</span><span class="s-name">C</span></div>
+      </div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
+        <button class="btn btn-secondary" onclick="showCollision()" style="font-size:0.72rem;padding:0.6rem 1.2rem;">⚡ Simulate Collision</button>
+        <button class="btn btn-secondary" onclick="clearCollision()" style="font-size:0.72rem;padding:0.6rem 1.2rem;">✓ Clear Channel</button>
+      </div>
+    </div>
+
+    <!-- CSMA/CA -->
+    <div class="mac-panel" id="mac-csmaca">
+      <div class="mac-desc"><strong>Carrier Sense Multiple Access / Collision Avoidance</strong> — Used in wireless networks (Wi-Fi). Instead of detecting collisions after the fact (impossible over radio), stations <strong>avoid them proactively</strong>. A station sends an RTS (Request-to-Send); the access point replies with CTS (Clear-to-Send). Only then does the station transmit.</div>
+      <div style="display:flex;align-items:center;gap:1rem;margin:1.5rem 0;font-family:'Space Mono',monospace;font-size:0.72rem;flex-wrap:wrap;">
+        <div class="station"><span class="s-icon">📱</span><span class="s-name">Station</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;flex:1;min-width:200px;">
+          <div id="rts-arrow" style="display:flex;align-items:center;gap:0.5rem;opacity:0.3;transition:opacity 0.4s;">
+            <div style="height:2px;flex:1;background:var(--accent);"></div>
+            <span style="color:var(--accent);">RTS →</span>
+          </div>
+          <div id="cts-arrow" style="display:flex;align-items:center;gap:0.5rem;opacity:0.3;transition:opacity 0.4s;">
+            <span style="color:var(--accent3);">← CTS</span>
+            <div style="height:2px;flex:1;background:var(--accent3);"></div>
+          </div>
+          <div id="data-arrow" style="display:flex;align-items:center;gap:0.5rem;opacity:0.3;transition:opacity 0.4s;">
+            <div style="height:2px;flex:1;background:#a78bfa;"></div>
+            <span style="color:#a78bfa;">DATA →</span>
+          </div>
+        </div>
+        <div class="station"><span class="s-icon">📡</span><span class="s-name">AP</span></div>
+      </div>
+      <button class="btn btn-secondary" onclick="animateCsmaCA()" style="font-size:0.72rem;padding:0.6rem 1.2rem;">▶ Simulate RTS/CTS</button>
+    </div>
+
+    <!-- TOKEN PASSING -->
+    <div class="mac-panel" id="mac-token">
+      <div class="mac-desc"><strong>Token Passing</strong> — A special control frame called the <strong>token</strong> circulates continuously around a ring. Only the station holding the token may transmit. After capturing it, the station marks it "busy", attaches data, and sends it around. When the data reaches the destination (and is acknowledged), the token is released as "free".</div>
+      <div style="display:flex;justify-content:center;margin:2rem 0;" id="token-ring-container">
+        <svg width="300" height="200" viewBox="0 0 300 200">
+          <circle cx="150" cy="100" r="70" fill="none" stroke="var(--border)" stroke-width="2" stroke-dasharray="6 4"/>
+          <circle cx="150" cy="30" r="18" fill="var(--bg3)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="150" y="35" text-anchor="middle" font-family="Space Mono" font-size="9" fill="var(--muted)">A</text>
+          <circle cx="220" cy="150" r="18" fill="var(--bg3)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="220" y="155" text-anchor="middle" font-family="Space Mono" font-size="9" fill="var(--muted)">B</text>
+          <circle cx="80" cy="150" r="18" fill="var(--bg3)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="80" y="155" text-anchor="middle" font-family="Space Mono" font-size="9" fill="var(--muted)">C</text>
+          <!-- Token -->
+          <circle id="token-dot" cx="150" cy="30" r="6" fill="var(--accent)" opacity="0.9"/>
+          <text id="token-label" x="150" y="14" text-anchor="middle" font-family="Space Mono" font-size="7" fill="var(--accent)">TOKEN</text>
+        </svg>
+      </div>
+      <button class="btn btn-secondary" onclick="animateToken()" style="font-size:0.72rem;padding:0.6rem 1.2rem;">▶ Circulate Token</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ERROR DETECTION -->
+<section id="errors">
+  <div class="section-label">03 — Error Detection & Correction</div>
+  <h2 class="section-title reveal">Not all bits survive<br>the journey</h2>
+  <p style="font-family:'Space Mono',monospace;font-size:0.82rem;color:var(--muted);max-width:640px;line-height:1.8;margin-bottom:3rem;" class="reveal">
+    Bit error rates range from <strong style="color:var(--text)">10⁻¹² in optical fiber</strong> to <strong style="color:var(--text)">10⁻⁵ in wireless</strong>. Detection is mandatory. Here are the three main techniques.
+  </p>
+
+  <div class="accordion reveal" style="margin-bottom:2rem;">
+    <div class="acc-item" id="err1">
+      <div class="acc-header" onclick="toggleAcc('err1')">
+        <div class="acc-num" style="background:var(--accent2);color:#fff;">P</div>
+        <div class="acc-name">Parity Bit</div>
+        <div class="acc-tag">SIMPLE</div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-content">
+          <div class="acc-desc">The simplest method. A single <strong>control bit is appended</strong> to a data word so the total count of '1' bits is either even (even parity) or odd (odd parity). <br><br>Example: Data <strong>1010110</strong> has 4 ones → even. Append <strong>0</strong> for even parity → 10101100.<br><br>Limitation: Can only detect an <strong>odd number of errors</strong>. Two bit flips cancel each other out and go undetected.</div>
+          <div class="acc-examples">
+            <h4>Properties</h4>
+            <div class="tag-row">
+              <span class="tag">1 Control Bit</span>
+              <span class="tag">Detects Odd Errors</span>
+              <span class="tag">Can't Correct</span>
+              <span class="tag">Minimal Overhead</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="acc-item" id="err2">
+      <div class="acc-header" onclick="toggleAcc('err2')">
+        <div class="acc-num" style="background:#a78bfa;color:#fff;">H</div>
+        <div class="acc-name">Hamming Code</div>
+        <div class="acc-tag">SELF-CORRECTING</div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-content">
+          <div class="acc-desc">Uses <strong>k control bits</strong> inserted at power-of-2 positions (1, 2, 4, 8, ...) to not only detect but <strong>pinpoint the exact position</strong> of a single-bit error. The receiver can then flip the erroneous bit to correct it — no retransmission needed.<br><br>The rule: for m data bits, you need k control bits where <strong>2ᵏ ≥ m + k + 1</strong>.</div>
+          <div class="acc-examples">
+            <h4>Properties</h4>
+            <div class="tag-row">
+              <span class="tag">k Control Bits</span>
+              <span class="tag">Locates Error</span>
+              <span class="tag">Self-Correcting</span>
+              <span class="tag">1-Bit Errors</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="acc-item" id="err3">
+      <div class="acc-header" onclick="toggleAcc('err3')">
+        <div class="acc-num" style="background:var(--accent3);color:#000;">C</div>
+        <div class="acc-name">CRC — Cyclic Redundancy Check</div>
+        <div class="acc-tag">MOST POWERFUL</div>
+        <div class="acc-arrow">▼</div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-content">
+          <div class="acc-desc">The most widely used method. Data is treated as a <strong>binary polynomial</strong> and divided by a generator polynomial. The <strong>remainder</strong> (the CRC value) is appended to the frame. The receiver performs the same division — a <strong>zero remainder = no errors</strong>.<br><br>Ethernet uses a <strong>32-bit CRC</strong> (CRC-32) which can detect all burst errors up to 32 bits long.</div>
+          <div class="acc-examples">
+            <h4>Properties</h4>
+            <div class="tag-row">
+              <span class="tag">Polynomial Division</span>
+              <span class="tag">Burst Error Detection</span>
+              <span class="tag">CRC-32 (Ethernet)</span>
+              <span class="tag">Very Reliable</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hamming Interactive -->
+  <div class="hamming-demo reveal">
+    <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.5rem;">Hamming Code — Interactive Demo</h3>
+    <div class="hamming-info">4 data bits (D) require <strong>3 parity bits (P)</strong> at positions 1, 2, 4. Click a bit to flip it and watch the error get detected and corrected.</div>
+    <div class="hamming-bits" id="hammingBits"></div>
+    <div id="hammingMsg" style="font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--muted);min-height:1.5rem;"></div>
+    <div style="display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="resetHamming()" style="font-size:0.72rem;padding:0.6rem 1.2rem;">↺ Reset</button>
+      <button class="btn btn-secondary" onclick="injectError()" style="font-size:0.72rem;padding:0.6rem 1.2rem;">⚡ Inject Error</button>
+      <button class="btn btn-secondary" onclick="fixError()" style="font-size:0.72rem;padding:0.6rem 1.2rem;">🔧 Correct Error</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PROTOCOLS & FRAMING -->
+<section id="protocols">
+  <div class="section-label">04 — Protocols & Framing</div>
+  <h2 class="section-title reveal">Structure of a frame<br>& HDLC protocol</h2>
+
+  <!-- HDLC Frame Structure -->
+  <div class="frame-viz reveal">
+    <h3 style="font-size:1rem;font-weight:700;margin-bottom:1.5rem;font-family:'Space Mono',monospace;color:var(--muted);">HDLC Frame Structure — hover each field</h3>
+    <div class="frame-struct">
+      <div class="frame-field frame-flag">
+        <div class="f-name">FLAG</div>
+        <div class="f-size">8 bits</div>
+        <div class="field-tooltip">01111110 — marks the start of the frame. Bit stuffing prevents this pattern from appearing in data.</div>
+      </div>
+      <div class="frame-field frame-addr">
+        <div class="f-name">ADDRESS</div>
+        <div class="f-size">8+ bits</div>
+        <div class="field-tooltip">Identifies the destination station's address on the link.</div>
+      </div>
+      <div class="frame-field frame-ctrl">
+        <div class="f-name">CONTROL</div>
+        <div class="f-size">8/16 bits</div>
+        <div class="field-tooltip">Frame type (I/S/U), sequence numbers, and control info for flow/error management.</div>
+      </div>
+      <div class="frame-field frame-data">
+        <div class="f-name">DATA</div>
+        <div class="f-size">Variable</div>
+        <div class="field-tooltip">The actual payload — the network layer packet being transported.</div>
+      </div>
+      <div class="frame-field frame-fcs">
+        <div class="f-name">FCS / CRC</div>
+        <div class="f-size">16/32 bits</div>
+        <div class="field-tooltip">Frame Check Sequence — the CRC value used to detect transmission errors.</div>
+      </div>
+      <div class="frame-field frame-flag">
+        <div class="f-name">FLAG</div>
+        <div class="f-size">8 bits</div>
+        <div class="field-tooltip">01111110 — marks the end of the frame.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bit Stuffing -->
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:2rem;margin:2rem 0;transition:all 0.3s ease;" class="reveal" id="bitstuff-card">
+    <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">Bit Stuffing — The Flag Problem</h3>
+    <p style="font-family:'Space Mono',monospace;font-size:0.78rem;color:var(--muted);line-height:1.7;margin-bottom:1.5rem;">
+      HDLC uses <strong style="color:var(--text)">01111110</strong> as a flag. But what if real data contains the same bit pattern? The receiver would wrongly think a frame ended. The fix: <strong style="color:var(--text)">bit stuffing</strong>. The sender inserts a <strong style="color:var(--text)">0</strong> after every 5 consecutive 1s in the data. The receiver removes it automatically.
+    </p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+      <div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--muted);margin-bottom:0.5rem;letter-spacing:0.2em;">ORIGINAL DATA</div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.9rem;letter-spacing:0.15em;line-height:2;" id="orig-bits">
+          0 1 <span style="color:var(--accent)">1 1 1 1 1</span> 1 0 0
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--accent2);margin-top:0.5rem;">⚠ Contains 6 ones — flag collision risk!</div>
+      </div>
+      <div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--muted);margin-bottom:0.5rem;letter-spacing:0.2em;">AFTER BIT STUFFING</div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.9rem;letter-spacing:0.15em;line-height:2;">
+          0 1 <span style="color:var(--accent)">1 1 1 1 1</span> <span style="color:var(--accent3);font-weight:700;">0</span> 1 0 0
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--accent3);margin-top:0.5rem;">✓ Stuffed 0 inserted — safe to transmit</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Switch & Bridge -->
+  <h3 style="font-size:1.1rem;font-weight:700;margin:3rem 0 1.5rem;" class="reveal">Layer 2 Hardware</h3>
+  <div class="cards-grid reveal">
+    <div class="card">
+      <div class="card-icon">🔀</div>
+      <h3>Switch</h3>
+      <p>Reads frame headers to <strong>forward data only to the specific port</strong> of the destination station. Maintains a MAC address table mapping addresses to physical ports. Dramatically reduces collisions compared to a hub, which broadcasts to all ports.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌉</div>
+      <h3>Bridge</h3>
+      <p>Connects different network <strong>segments using the same protocol</strong>. Filters frames based on MAC addresses and limits the scope of broadcast traffic — it creates a boundary for broadcast domains, preventing them from flooding the entire network.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="section-label">05 — Knowledge Check</div>
+  <h2 class="section-title reveal">Test yourself</h2>
+  <div id="quizContainer" class="reveal"></div>
+</section>
+
+<footer>
+  <p>Data Link Layer · Layer 2 · OSI Model<br>
+  NTIC Faculty, University of Constantine 2 — Prof. Nabil Belala · February 2025</p>
+</footer>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  function animCursor() {
+    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+    cursor.style.transform = `translate(${mx-6}px, ${my-6}px)`;
+    ring.style.transform = `translate(${rx-18}px, ${ry-18}px)`;
+    requestAnimationFrame(animCursor);
+  }
+  animCursor();
+
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+  });
+
+  // Scroll reveal
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // Accordion
+  function toggleAcc(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('open');
+  }
+
+  // MAC tabs
+  function switchMac(tab, btn) {
+    document.querySelectorAll('.mac-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.mac-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('mac-' + tab).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // CSMA/CD collision sim
+  function showCollision() {
+    document.getElementById('cd-line1').classList.add('collision');
+    document.getElementById('cd-line2').classList.add('collision');
+  }
+  function clearCollision() {
+    document.getElementById('cd-line1').classList.remove('collision');
+    document.getElementById('cd-line2').classList.remove('collision');
+  }
+
+  // CSMA/CA animation
+  function animateCsmaCA() {
+    const rts = document.getElementById('rts-arrow');
+    const cts = document.getElementById('cts-arrow');
+    const data = document.getElementById('data-arrow');
+    rts.style.opacity = '0.3'; cts.style.opacity = '0.3'; data.style.opacity = '0.3';
+    setTimeout(() => { rts.style.opacity = '1'; }, 300);
+    setTimeout(() => { cts.style.opacity = '1'; }, 900);
+    setTimeout(() => { data.style.opacity = '1'; }, 1500);
+  }
+
+  // Token animation
+  let tokenAnim = null;
+  const positions = [
+    {cx: 150, cy: 30},  // A
+    {cx: 220, cy: 150}, // B
+    {cx: 80,  cy: 150}, // C
+    {cx: 150, cy: 30}   // back to A
+  ];
+  function animateToken() {
+    if (tokenAnim) clearInterval(tokenAnim);
+    let step = 0;
+    const dot = document.getElementById('token-dot');
+    const label = document.getElementById('token-label');
+    const stationNames = ['A', 'B', 'C', 'A'];
+    function move() {
+      if (step >= positions.length) { step = 0; }
+      const {cx, cy} = positions[step];
+      dot.setAttribute('cx', cx);
+      dot.setAttribute('cy', cy);
+      label.setAttribute('x', cx);
+      label.setAttribute('y', cy - 12);
+      step++;
+    }
+    move();
+    tokenAnim = setInterval(move, 900);
+  }
+
+  // Hamming demo
+  // 4 data bits at positions 3,5,6,7; parity at 1,2,4
+  // Example data: D={1,0,1,1} → compute parity bits
+  let hammingData = [1, 0, 1, 1];
+  let hammingBits = []; // index 1-7
+  let errorPos = -1;
+
+  function computeHamming(data) {
+    // positions 1-7: p1,p2,d3,p4,d5,d6,d7
+    const b = [0, 0, 0, data[0], 0, data[1], data[2], data[3]]; // 1-indexed
+    b[1] = b[3] ^ b[5] ^ b[7];
+    b[2] = b[3] ^ b[6] ^ b[7];
+    b[4] = b[5] ^ b[6] ^ b[7];
+    return b;
+  }
+
+  function renderHamming() {
+    const container = document.getElementById('hammingBits');
+    container.innerHTML = '';
+    for (let i = 1; i <= 7; i++) {
+      const div = document.createElement('div');
+      div.className = 'h-bit ' + ([1,2,4].includes(i) ? 'parity' : 'data');
+      if (errorPos === i) div.classList.add('error');
+      div.innerHTML = `<span class="pos">${i}</span>${hammingBits[i]}`;
+      div.title = [1,2,4].includes(i) ? `P${i} (parity)` : `D${i} (data)`;
+      div.onclick = () => { flipBit(i); };
+      container.appendChild(div);
+    }
+    const legend = document.createElement('div');
+    legend.style.cssText = 'font-family:Space Mono,monospace;font-size:0.65rem;color:var(--muted);margin-top:0.5rem;width:100%;';
+    legend.innerHTML = '<span style="color:var(--accent)">■ Parity bit</span> &nbsp; <span style="color:#a78bfa">■ Data bit</span>';
+    container.appendChild(legend);
+  }
+
+  function resetHamming() {
+    hammingBits = computeHamming(hammingData);
+    errorPos = -1;
+    renderHamming();
+    document.getElementById('hammingMsg').textContent = '✓ No errors detected.';
+    document.getElementById('hammingMsg').style.color = 'var(--accent3)';
+  }
+
+  function injectError() {
+    const pos = Math.floor(Math.random() * 7) + 1;
+    hammingBits[pos] ^= 1;
+    errorPos = pos;
+    renderHamming();
+    document.getElementById('hammingMsg').textContent = `⚡ Error injected! Can you spot it? Use "Correct Error" to find and fix it.`;
+    document.getElementById('hammingMsg').style.color = 'var(--accent2)';
+  }
+
+  function fixError() {
+    // Calculate syndrome
+    const s1 = hammingBits[1] ^ hammingBits[3] ^ hammingBits[5] ^ hammingBits[7];
+    const s2 = hammingBits[2] ^ hammingBits[3] ^ hammingBits[6] ^ hammingBits[7];
+    const s4 = hammingBits[4] ^ hammingBits[5] ^ hammingBits[6] ^ hammingBits[7];
+    const syndrome = s1 + s2*2 + s4*4;
+    if (syndrome === 0) {
+      document.getElementById('hammingMsg').textContent = '✓ No errors found — data is correct!';
+      document.getElementById('hammingMsg').style.color = 'var(--accent3)';
+      return;
+    }
+    hammingBits[syndrome] ^= 1;
+    const prevError = errorPos;
+    errorPos = -1;
+    renderHamming();
+    // Mark as fixed briefly
+    const bits = document.querySelectorAll('.h-bit');
+    bits[syndrome-1].classList.add('fixed');
+    setTimeout(() => bits[syndrome-1].classList.remove('fixed'), 1500);
+    document.getElementById('hammingMsg').textContent = `🔧 Error found at bit position ${syndrome} — corrected!`;
+    document.getElementById('hammingMsg').style.color = 'var(--accent3)';
+  }
+
+  function flipBit(i) {
+    hammingBits[i] ^= 1;
+    if (errorPos === i) errorPos = -1; else errorPos = i;
+    renderHamming();
+    document.getElementById('hammingMsg').textContent = `Bit ${i} flipped. Run correction to check.`;
+    document.getElementById('hammingMsg').style.color = 'var(--muted)';
+  }
+
+  resetHamming();
+
+  // QUIZ
+  const questions = [
+    {
+      q: "What is the primary data unit of the Data Link Layer?",
+      options: ["Packet", "Bit", "Frame", "Segment"],
+      answer: 2,
+      explanation: "The Data Link Layer organizes raw bits into structured units called Frames. Each layer has its own PDU: Physical=Bits, Data Link=Frames, Network=Packets, Transport=Segments."
+    },
+    {
+      q: "In CSMA/CD, what happens when a collision is detected?",
+      options: [
+        "The frame is silently discarded",
+        "A jamming signal is sent and stations retry after a random delay",
+        "The station waits for a token",
+        "An RTS is sent to the access point"
+      ],
+      answer: 1,
+      explanation: "When a collision is detected in CSMA/CD, all transmitting stations send a jamming signal to ensure all devices know a collision occurred, then each waits a random backoff time before retrying."
+    },
+    {
+      q: "Which error detection method can both DETECT and CORRECT a single-bit error?",
+      options: ["Parity Bit", "CRC-32", "Hamming Code", "Checksum"],
+      answer: 2,
+      explanation: "Hamming Code uses k control bits at power-of-2 positions to pinpoint the exact location of a single-bit error. Once located, the bit can be flipped to correct it — no retransmission needed."
+    },
+    {
+      q: "What is the flag pattern used by HDLC to delimit frames?",
+      options: ["11111111", "01111110", "10101010", "00000000"],
+      answer: 1,
+      explanation: "HDLC uses the bit pattern 01111110 as a flag to mark the start and end of a frame. Bit stuffing (inserting a 0 after five consecutive 1s in data) ensures this pattern cannot accidentally appear in the payload."
+    },
+    {
+      q: "A station on a Wi-Fi network wants to transmit. In CSMA/CA, it first sends...",
+      options: [
+        "The data frame immediately",
+        "A jamming signal",
+        "An RTS (Request-to-Send)",
+        "A token to the access point"
+      ],
+      answer: 2,
+      explanation: "In CSMA/CA (used in Wi-Fi), a station first sends an RTS (Request-to-Send). The access point replies with CTS (Clear-to-Send) if the medium is free, and only then does the station transmit its data."
+    },
+    {
+      q: "What does a network Switch use to decide where to forward a frame?",
+      options: [
+        "IP address table",
+        "Routing protocol (OSPF/RIP)",
+        "MAC address table",
+        "Port number"
+      ],
+      answer: 2,
+      explanation: "A Layer 2 switch maintains a MAC address table that maps physical MAC addresses to specific ports. It reads the frame's destination MAC and forwards it only to the correct port, reducing unnecessary traffic."
+    },
+    {
+      q: "In the connectionless-with-acknowledgment mode, what happens if a frame is not acknowledged?",
+      options: [
+        "The frame is considered delivered",
+        "The connection is terminated",
+        "The frame is retransmitted after a timeout",
+        "An error is sent to the Network layer"
+      ],
+      answer: 2,
+      explanation: "In connectionless-with-acknowledgment mode, every frame must be acknowledged before the next one is sent. If no ACK arrives within a timeout period, the frame is retransmitted. This provides reliability on unreliable links like Wi-Fi."
+    }
+  ];
+
+  let current = 0, score = 0, answered = false;
+
+  function renderQuiz() {
+    const q = questions[current];
+    document.getElementById('quizContainer').innerHTML = `
+      <div class="quiz-card">
+        <div class="quiz-q">
+          <span>Question ${current+1} of ${questions.length}</span>
+          ${q.q}
+        </div>
+        <div class="quiz-options">
+          ${q.options.map((o,i) => `<button class="quiz-opt" onclick="answer(${i})">${o}</button>`).join('')}
+        </div>
+        <div class="quiz-feedback" id="qfb"></div>
+        <div class="quiz-nav">
+          ${current < questions.length-1
+            ? `<button class="btn btn-secondary" id="nextBtn" onclick="nextQ()" style="display:none">Next →</button>`
+            : `<button class="btn btn-primary" id="nextBtn" onclick="showResult()" style="display:none">See Results</button>`
+          }
+          <div class="quiz-score">Score: ${score}/${current}</div>
+        </div>
+      </div>`;
+    answered = false;
+  }
+
+  function answer(idx) {
+    if (answered) return;
+    answered = true;
+    const q = questions[current];
+    const opts = document.querySelectorAll('.quiz-opt');
+    const fb = document.getElementById('qfb');
+    opts.forEach((o,i) => {
+      if (i === q.answer) o.classList.add('correct');
+      else if (i === idx) o.classList.add('wrong');
+      o.onclick = null;
+    });
+    if (idx === q.answer) {
+      score++;
+      fb.className = 'quiz-feedback show good';
+      fb.innerHTML = '✓ Correct! ' + q.explanation;
+    } else {
+      fb.className = 'quiz-feedback show bad';
+      fb.innerHTML = '✗ Not quite. ' + q.explanation;
+    }
+    document.getElementById('nextBtn').style.display = 'inline-block';
+    document.querySelector('.quiz-score').textContent = `Score: ${score}/${current+1}`;
+  }
+
+  function nextQ() { current++; renderQuiz(); }
+
+  function showResult() {
+    const pct = Math.round(score / questions.length * 100);
+    const grade = pct === 100 ? '🏆 Perfect!' : pct >= 70 ? '✅ Well done!' : '📚 Keep studying!';
+    document.getElementById('quizContainer').innerHTML = `
+      <div class="quiz-card" style="text-align:center">
+        <div style="font-size:4rem;margin-bottom:1rem">${grade.split(' ')[0]}</div>
+        <h2 style="font-size:2rem;margin-bottom:0.5rem">${score} / ${questions.length}</h2>
+        <p style="font-family:'Space Mono',monospace;font-size:0.8rem;color:var(--muted);margin-bottom:2rem">${pct}% — ${grade.split(' ').slice(1).join(' ')}</p>
+        <button class="btn btn-primary" onclick="restartQuiz()">Try Again</button>
+      </div>`;
+  }
+
+  function restartQuiz() { current = 0; score = 0; answered = false; renderQuiz(); }
+
+  renderQuiz();
+</script>
+</body>
+</html>
