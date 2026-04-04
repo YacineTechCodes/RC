@@ -447,3 +447,13 @@ footer p {
     display: none;
   }
 }
+
+body.normal-cursor-mode,
+body.normal-cursor-mode * {
+  cursor: auto !important;
+}
+
+body.normal-cursor-mode .cursor,
+body.normal-cursor-mode .cursor-ring {
+  display: none !important;
+}
